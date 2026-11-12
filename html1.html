@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VITAP - Student Management System</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--blue:#003087;--gold:#FFD700;--cyan:#00D4FF;--purple:#7B2FFF;
+--dark:#000510;--card:#020B18;--border:rgba(0,212,255,0.15);
+--success:#00FF88;--warning:#FFB800;--danger:#FF3366;
+}
+body{font-family:'Segoe UI',sans-serif;background:var(--dark);color:#fff;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--cyan);border-radius:4px}
+
+/* PAGES */
+.page{display:none;min-height:100vh;flex-direction:column}
+.page.active{display:flex}
+
+/* ANIMATIONS - minimal */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spin-r{to{transform:rotate(-360deg)}}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes scan{0%{top:0;opacity:1}100%{top:100%;opacity:0}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* ═══════ LANDING ═══════ */
+#pg-land{background:var(--dark);position:relative;overflow:hidden;align-items:center;justify-content:center}
+
+.land-grid{position:absolute;inset:0;
+background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);
+background-size:50px 50px;pointer-events:none}
+
+/* VITAP Bar */
+.vbar{position:absolute;top:0;left:0;right:0;height:55px;
+background:rgba(0,48,135,.97);border-bottom:2px solid var(--gold);
+display:flex;align-items:center;padding:0 30px;gap:15px;z-index:50}
+.vbar-em{width:40px;height:40px;border-radius:50%;background:var(--gold);
+display:flex;align-items:center;justify-content:center;
+font-size:12px;font-weight:900;color:var(--blue);flex-shrink:0}
+.vbar h1{font-size:16px;font-weight:800;color:var(--gold);letter-spacing:2px}
+.vbar p{font-size:10px;color:rgba(255,255,255,.6);letter-spacing:1px}
+.vbar-links{display:flex;gap:20px;margin-left:auto}
+.vbar-links a{color:rgba(255,255,255,.7);text-decoration:none;font-size:11px;
+letter-spacing:1px;transition:color .2s}
+.vbar-links a:hover{color:var(--gold)}
+
+/* LANDING WRAP */
+.land-wrap{position:relative;z-index:10;display:flex;align-items:center;
+justify-content:center;gap:70px;padding:80px 40px 40px;flex-wrap:wrap;width:100%;max-width:1300px}
+
+/* TEXT */
+.land-text{flex:1;min-width:320px;animation:slideUp .5s ease}
+.l-tag{display:inline-flex;align-items:center;gap:8px;
+background:rgba(0,48,135,.5);border:1px solid rgba(255,215,0,.4);
+border-radius:30px;padding:6px 16px;margin-bottom:20px}
+.l-tag-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);
+box-shadow:0 0 8px var(--gold);animation:blink 1.5s ease-in-out infinite}
+.l-tag span{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:600}
+.l-title{font-size:50px;font-weight:900;line-height:1.1;margin-bottom:15px}
+.l-title .t1{color:#fff;display:block}
+.l-title .t2{background:linear-gradient(135deg,var(--cyan),var(--purple));
+-webkit-background-clip:text;background-clip:text;color:transparent;display:block}
+.l-title .t3{color:var(--gold);display:block}
+.l-desc{font-size:14px;color:rgba(255,255,255,.55);line-height:1.8;margin-bottom:28px;max-width:450px}
+.l-stats{display:flex;gap:28px;margin-bottom:32px;flex-wrap:wrap}
+.l-stat-n{font-size:26px;font-weight:900;color:var(--cyan)}
+.l-stat-l{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.3);margin-top:2px}
+
+/* ENTER BUTTON */
+.enter-btn{position:relative;display:inline-flex;align-items:center;gap:12px;
+padding:18px 45px;background:rgba(0,212,255,.08);
+border:1px solid rgba(0,212,255,.4);border-radius:6px;
+color:#fff;font-size:13px;font-weight:700;letter-spacing:3px;
+cursor:pointer;transition:all .3s;overflow:hidden}
+.enter-btn::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+background-size:200% auto;animation:shimmer 2s linear infinite}
+.enter-btn:hover{background:rgba(0,212,255,.18);
+box-shadow:0 0 30px rgba(0,212,255,.25);transform:translateY(-2px)}
+.enter-btn .arr{transition:transform .3s}
+.enter-btn:hover .arr{transform:translateX(6px)}
+.feat-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.feat{padding:5px 13px;border:1px solid rgba(0,212,255,.2);
+border-radius:20px;font-size:11px;color:rgba(255,255,255,.5)}
+
+/* HOLOGRAM */
+.holo-side{flex-shrink:0;animation:float 5s ease-in-out infinite}
+.holo-stage{position:relative;width:340px;height:420px;
+display:flex;align-items:center;justify-content:center}
+.h-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,212,255,.18)}
+.h-ring-1{width:340px;height:340px;animation:spin 20s linear infinite}
+.h-ring-2{width:265px;height:265px;border-color:rgba(0,212,255,.25);animation:spin-r 15s linear infinite}
+.h-ring-3{width:190px;height:190px;border-color:rgba(123,47,255,.3);animation:spin 10s linear infinite}
+.h-disc{position:absolute;width:170px;height:170px;border-radius:50%;
+background:radial-gradient(circle,rgba(0,212,255,.08),transparent 70%);
+border:1px solid rgba(0,212,255,.3);animation:pulse 3s ease-in-out infinite}
+.h-scan{position:absolute;width:170px;height:170px;border-radius:50%;overflow:hidden;pointer-events:none}
+.h-scan::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+background:linear-gradient(90deg,transparent,rgba(0,212,255,.7),transparent);
+box-shadow:0 0 12px rgba(0,212,255,.7);animation:scan 2.5s linear infinite}
+.h-rdot{position:absolute;border-radius:50%;top:50%;left:50%;transform-origin:0 0}
+.h-rdot.c{width:7px;height:7px;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.h-rdot.g{width:7px;height:7px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.h-cor{position:absolute;width:18px;height:18px}
+.h-cor.tl{top:12px;left:12px;border-top:2px solid rgba(0,212,255,.6);border-left:2px solid rgba(0,212,255,.6)}
+.h-cor.tr{top:12px;right:12px;border-top:2px solid rgba(0,212,255,.6);border-right:2px solid rgba(0,212,255,.6)}
+.h-cor.bl{bottom:30px;left:12px;border-bottom:2px solid rgba(0,212,255,.6);border-left:2px solid rgba(0,212,255,.6)}
+.h-cor.br{bottom:30px;right:12px;border-bottom:2px solid rgba(0,212,255,.6);border-right:2px solid rgba(0,212,255,.6)}
+.h-ctr{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.h-badge{width:68px;height:68px;border-radius:50%;
+background:radial-gradient(circle,rgba(0,48,135,.8),rgba(0,212,255,.1));
+border:2px solid rgba(255,215,0,.6);display:flex;align-items:center;justify-content:center;
+box-shadow:0 0 20px rgba(0,212,255,.3);animation:pulse 2s ease-in-out infinite}
+.h-badge span{font-size:20px;font-weight:900;color:var(--gold)}
+.h-name{font-size:18px;font-weight:800;letter-spacing:3px;
+text-shadow:0 0 12px rgba(0,212,255,.8)}
+.h-sub{font-size:9px;letter-spacing:4px;color:var(--cyan)}
+.h-div{width:110px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+box-shadow:0 0 8px rgba(0,212,255,.4)}
+.h-photo{position:relative;width:90px;height:90px}
+.h-pb{position:absolute;inset:-5px;border-radius:50%;
+background:conic-gradient(var(--cyan) 0deg,transparent 80deg,var(--gold) 160deg,transparent 240deg,var(--cyan) 320deg,transparent 360deg);
+animation:spin 3s linear infinite}
+.h-pm{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:#041020;
+border:3px solid #000;z-index:2;display:flex;align-items:center;justify-content:center}
+.h-pm img{width:100%;height:100%;object-fit:cover}
+.ph-icon{font-size:28px}
+.ph-txt{font-size:8px;letter-spacing:2px;color:rgba(0,212,255,.5);margin-top:2px}
+.h-nm{font-size:13px;font-weight:700;letter-spacing:2px}
+.h-rl{font-size:9px;letter-spacing:2px;color:rgba(0,212,255,.7)}
+.h-chip{display:flex;align-items:center;gap:5px;background:rgba(0,212,255,.07);
+border:1px solid rgba(0,212,255,.2);border-radius:20px;padding:4px 12px;
+font-size:9px;color:rgba(0,212,255,.8);letter-spacing:2px}
+.h-chip .dot{width:5px;height:5px;background:var(--cyan);border-radius:50%;
+box-shadow:0 0 6px var(--cyan);animation:blink 1.2s ease-in-out infinite}
+.h-base{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+width:200px;height:15px;background:radial-gradient(ellipse,rgba(0,212,255,.35),transparent 70%);
+filter:blur(6px);animation:pulse 2s ease-in-out infinite}
+
+/* ═══════ LOGIN ═══════ */
+#pg-login{background:var(--dark);align-items:center;justify-content:center;position:relative;overflow:hidden}
+.login-bg{position:absolute;inset:0;
+background-image:linear-gradient(rgba(0,48,135,.04) 1px,transparent 1px),
+linear-gradient(90deg,rgba(0,48,135,.04) 1px,transparent 1px);
+background-size:40px 40px}
+.login-vbar{position:absolute;top:0;left:0;right:0;height:52px;
+background:rgba(0,48,135,.96);border-bottom:2px solid var(--gold);
+display:flex;align-items:center;padding:0 30px;gap:12px;z-index:10}
+.login-vbar .vb-em{width:36px;height:36px;border-radius:50%;background:var(--gold);
+display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--blue)}
+.login-vbar h2{font-size:14px;font-weight:800;color:var(--gold);letter-spacing:2px}
+.login-vbar span{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:1px;margin-left:auto}
+.login-wrap{position:relative;z-index:5;display:flex;align-items:center;
+justify-content:center;gap:50px;padding:75px 30px 30px;flex-wrap:wrap}
+.login-card{width:400px;background:rgba(2,11,24,.97);border-radius:18px;
+border:1px solid rgba(0,212,255,.2);overflow:hidden;
+box-shadow:0 0 40px rgba(0,0,0,.5);animation:slideUp .4s ease;position:relative}
+.lc-top{height:2px;background:linear-gradient(90deg,transparent,var(--cyan),var(--gold),var(--cyan),transparent);
+background-size:200% auto;animation:shimmer 3s linear infinite}
+.lc-hdr{background:linear-gradient(135deg,rgba(0,48,135,.9),rgba(0,212,255,.08));
+padding:25px;text-align:center;border-bottom:1px solid rgba(0,212,255,.1)}
+.lc-logo{width:54px;height:54px;border-radius:50%;background:var(--blue);
+border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;
+margin:0 auto 12px;font-size:16px;font-weight:900;color:var(--gold);
+box-shadow:0 0 18px rgba(0,212,255,.25)}
+.lc-hdr h2{font-size:18px;font-weight:800;color:#fff;letter-spacing:2px}
+.lc-hdr p{font-size:10px;letter-spacing:3px;color:var(--cyan);margin-top:4px}
+.lc-body{padding:25px}
+.l-tabs{display:flex;gap:3px;background:rgba(0,212,255,.04);
+border:1px solid rgba(0,212,255,.1);border-radius:10px;padding:3px;margin-bottom:20px}
+.l-tab{flex:1;padding:9px 5px;text-align:center;cursor:pointer;border-radius:8px;
+font-size:11px;letter-spacing:1px;color:rgba(0,212,255,.45);font-weight:600;transition:all .25s}
+.l-tab.active{background:rgba(0,212,255,.12);color:var(--cyan);box-shadow:0 0 12px rgba(0,212,255,.15)}
+.l-form{display:flex;flex-direction:column;gap:14px}
+.lf-g{display:flex;flex-direction:column;gap:5px}
+.lf-lbl{font-size:10px;letter-spacing:2px;color:rgba(0,212,255,.5);font-weight:600;text-transform:uppercase}
+.lf-w{position:relative}
+.lf-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:rgba(0,212,255,.35)}
+.lf-inp{width:100%;padding:12px 12px 12px 40px;
+background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.18);
+border-radius:9px;color:#fff;font-size:13px;outline:none;transition:border-color .25s}
+.lf-inp:focus{border-color:var(--cyan);background:rgba(0,212,255,.07)}
+.lf-inp::placeholder{color:rgba(255,255,255,.18);font-size:12px}
+.l-row{display:flex;justify-content:space-between;align-items:center}
+.l-rem{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.35);cursor:pointer}
+.l-rem input{accent-color:var(--cyan)}
+.l-fgt{font-size:11px;color:rgba(0,212,255,.45);cursor:pointer;transition:color .25s}
+.l-fgt:hover{color:var(--cyan)}
+.l-btn{width:100%;padding:14px;background:linear-gradient(135deg,rgba(0,48,135,.8),rgba(0,212,255,.15));
+border:1px solid rgba(0,212,255,.35);border-radius:10px;color:#fff;
+font-size:11px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:all .25s;margin-top:2px}
+.l-btn:hover{border-color:var(--cyan);box-shadow:0 0 25px rgba(0,212,255,.25);transform:translateY(-2px)}
+.l-demo{text-align:center;font-size:10px;color:rgba(255,255,255,.18);letter-spacing:1px;margin-top:3px}
+.l-back{text-align:center;margin-top:15px;font-size:11px;color:rgba(0,212,255,.35);
+cursor:pointer;letter-spacing:2px;font-weight:600;transition:color .25s}
+.l-back:hover{color:rgba(0,212,255,.8)}
+.l-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
+.lic{background:rgba(0,48,135,.2);border:1px solid rgba(0,212,255,.1);border-radius:9px;padding:12px}
+.lic .lic-i{font-size:16px;margin-bottom:3px}
+.lic .lic-l{font-size:9px;letter-spacing:2px;color:rgba(0,212,255,.4);font-weight:600}
+.lic .lic-v{font-size:13px;font-weight:700;color:#fff}
+
+/* ═══════ DASHBOARD ═══════ */
+#pg-dash{background:var(--dark);flex-direction:column}
+
+/* TOP NAV */
+.d-nav{background:rgba(0,48,135,.97);border-bottom:2px solid var(--gold);
+height:62px;display:flex;align-items:center;padding:0;
+position:sticky;top:0;z-index:200;flex-shrink:0}
+.dn-brand{display:flex;align-items:center;gap:10px;padding:0 15px 0 20px;
+border-right:1px solid rgba(255,255,255,.1);height:100%;flex-shrink:0}
+.dn-em{width:38px;height:38px;border-radius:50%;background:var(--gold);
+display:flex;align-items:center;justify-content:center;
+font-size:12px;font-weight:900;color:var(--blue);flex-shrink:0}
+.dn-nm h1{font-size:14px;font-weight:900;color:var(--gold);letter-spacing:2px}
+.dn-nm span{font-size:9px;color:rgba(255,255,255,.45);letter-spacing:2px;display:block}
+.ham{width:40px;height:40px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);
+border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+gap:5px;cursor:pointer;margin:0 15px;transition:all .25s;flex-shrink:0}
+.ham span{display:block;width:20px;height:2px;background:var(--gold);border-radius:2px;transition:all .3s}
+.ham:hover{background:rgba(255,215,0,.2)}
+.ham.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.ham.open span:nth-child(2){opacity:0}
+.ham.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.dn-tabs{display:flex;height:100%}
+.dn-tab{display:flex;align-items:center;gap:6px;padding:0 15px;
+font-size:11px;letter-spacing:1px;color:rgba(255,255,255,.5);cursor:pointer;
+transition:all .25s;border-bottom:3px solid transparent;font-weight:600;white-space:nowrap}
+.dn-tab:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.05)}
+.dn-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(255,215,0,.05)}
+.dn-tab .ti{font-size:14px}
+.dn-right{margin-left:auto;display:flex;align-items:center;gap:8px;padding-right:15px}
+.dn-src{display:flex;align-items:center;gap:7px;background:rgba(0,0,0,.3);
+border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:7px 12px;width:180px}
+.dn-src input{background:none;border:none;outline:none;color:#fff;font-size:12px;width:100%}
+.dn-src input::placeholder{color:rgba(255,255,255,.2)}
+.dn-ib{width:36px;height:36px;background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.1);border-radius:8px;
+display:flex;align-items:center;justify-content:center;cursor:pointer;
+font-size:14px;transition:all .25s;position:relative}
+.dn-ib:hover{background:rgba(255,215,0,.15);border-color:rgba(255,215,0,.3)}
+.n-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;
+background:var(--danger);border-radius:50%;box-shadow:0 0 5px var(--danger);animation:blink 1.5s ease-in-out infinite}
+.dn-user{display:flex;align-items:center;gap:8px;padding:5px 10px;
+border:1px solid rgba(255,215,0,.2);border-radius:8px;cursor:pointer;
+background:rgba(255,215,0,.05);transition:all .25s}
+.dn-user:hover{background:rgba(255,215,0,.1)}
+.dn-av{width:28px;height:28px;border-radius:50%;
+background:linear-gradient(135deg,var(--cyan),var(--purple));
+display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.du-n{font-size:12px;font-weight:600}
+.du-r{font-size:9px;color:rgba(255,215,0,.6);letter-spacing:1px}
+
+/* BODY */
+.d-body{display:flex;flex:1;overflow:hidden;height:calc(100vh - 62px)}
+
+/* SIDEBAR */
+.d-sb{width:230px;background:var(--card);border-right:1px solid rgba(0,212,255,.1);
+display:flex;flex-direction:column;overflow-y:auto;
+transition:width .3s ease;flex-shrink:0}
+.d-sb.closed{width:0;overflow:hidden}
+.sb-hdr{background:linear-gradient(135deg,rgba(0,48,135,.5),rgba(0,212,255,.08));
+padding:15px 18px;border-bottom:1px solid rgba(0,212,255,.1);white-space:nowrap}
+.sb-hdr-t{font-size:10px;letter-spacing:3px;color:rgba(0,212,255,.6);font-weight:600}
+.sb-sec{padding:8px 16px 3px;font-size:9px;letter-spacing:3px;
+color:rgba(255,255,255,.2);font-weight:600;text-transform:uppercase;white-space:nowrap}
+.sb-item{display:flex;align-items:center;gap:11px;padding:11px 16px;
+cursor:pointer;transition:all .25s;border-left:3px solid transparent;
+color:rgba(255,255,255,.4);font-size:12px;font-weight:600;white-space:nowrap}
+.sb-item:hover{background:rgba(0,212,255,.06);color:rgba(0,212,255,.8);border-left-color:rgba(0,212,255,.35)}
+.sb-item.active{background:rgba(0,212,255,.1);color:var(--cyan);border-left-color:var(--cyan)}
+.sb-ico{font-size:16px;width:18px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:rgba(0,212,255,.15);color:var(--cyan);
+font-size:9px;padding:2px 7px;border-radius:10px;border:1px solid rgba(0,212,255,.2)}
+.sb-ft{margin-top:auto;padding:12px;border-top:1px solid rgba(0,212,255,.1)}
+.sb-ft-in{background:rgba(0,48,135,.2);border:1px solid rgba(255,215,0,.12);
+border-radius:9px;padding:11px;display:flex;align-items:center;gap:9px;white-space:nowrap}
+.sb-ft-ico{font-size:20px}
+.sb-ft-n{font-size:11px;color:#fff;font-weight:600}
+.sb-ft-i{font-size:9px;color:rgba(0,212,255,.45);letter-spacing:1px}
+
+/* CONTENT */
+.d-ct{flex:1;overflow-y:auto;padding:22px;background:var(--dark)}
+.sub{display:none;animation:fadeIn .3s ease}
+.sub.active{display:block}
+
+/* PAGE BANNER */
+.p-ban{display:flex;align-items:center;justify-content:space-between;
+margin-bottom:22px;flex-wrap:wrap;gap:10px}
+.pb-t{font-size:20px;font-weight:800;letter-spacing:1px}
+.pb-s{font-size:11px;color:rgba(0,212,255,.5);letter-spacing:2px;margin-top:2px}
+.pb-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.sc{background:var(--card);border:1px solid rgba(0,212,255,.1);
+border-radius:13px;padding:18px;position:relative;overflow:hidden;transition:all .25s;cursor:default}
+.sc:hover{transform:translateY(-3px);border-color:rgba(0,212,255,.3);
+box-shadow:0 12px 35px rgba(0,0,0,.3)}
+.sc-gb{position:absolute;top:-15px;right:-15px;width:70px;height:70px;border-radius:50%;opacity:.07}
+.sc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sc-iw{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.sc-tr{font-size:11px}
+.sc-tr.up{color:var(--success)}
+.sc-tr.dn{color:var(--danger)}
+.sc-n{font-size:28px;font-weight:900}
+.sc-l{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:1px;margin-top:3px}
+
+/* CARDS */
+.c-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:18px}
+.c-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:18px}
+.card{background:var(--card);border:1px solid rgba(0,212,255,.1);border-radius:13px;overflow:hidden}
+.card-h{padding:14px 18px;border-bottom:1px solid rgba(0,212,255,.07);
+display:flex;align-items:center;justify-content:space-between;
+background:rgba(0,48,135,.08)}
+.card-h h3{font-size:13px;font-weight:700;letter-spacing:1px}
+.card-b{padding:16px 18px}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:9px 11px;text-align:left;font-size:9px;letter-spacing:2px;
+color:rgba(0,212,255,.4);border-bottom:1px solid rgba(0,212,255,.07);font-weight:700}
+.tbl td{padding:11px 11px;font-size:12px;color:rgba(255,255,255,.65);
+border-bottom:1px solid rgba(0,212,255,.04);transition:background .2s}
+.tbl tr:hover td{background:rgba(0,212,255,.03)}
+.si{display:flex;align-items:center;gap:9px}
+.sav{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.snm{font-weight:600;color:#fff;font-size:13px}
+.sid{font-size:10px;color:rgba(0,212,255,.4);letter-spacing:1px}
+
+/* BADGES */
+.bdg{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.bs{background:rgba(0,255,136,.1);color:var(--success);border:1px solid rgba(0,255,136,.22)}
+.bw{background:rgba(255,184,0,.1);color:var(--warning);border:1px solid rgba(255,184,0,.22)}
+.bd{background:rgba(255,51,102,.1);color:var(--danger);border:1px solid rgba(255,51,102,.22)}
+.bi{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.22)}
+.bg{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.22)}
+
+/* PROGRESS */
+.pb{background:rgba(255,255,255,.06);border-radius:10px;height:5px;overflow:hidden}
+.pf{height:100%;border-radius:10px;transition:width .5s ease}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:8px;border:1px solid;cursor:pointer;
+font-size:11px;font-weight:700;letter-spacing:1px;transition:all .25s;
+display:inline-flex;align-items:center;gap:5px}
+.btn:hover{transform:translateY(-2px)}
+.btn-p{background:rgba(0,48,135,.35);color:var(--cyan);border-color:rgba(0,212,255,.28)}
+.btn-p:hover{background:rgba(0,48,135,.6);box-shadow:0 0 18px rgba(0,212,255,.18)}
+.btn-g{background:rgba(255,215,0,.08);color:var(--gold);border-color:rgba(255,215,0,.28)}
+.btn-g:hover{background:rgba(255,215,0,.18)}
+.btn-s{background:rgba(0,255,136,.07);color:var(--success);border-color:rgba(0,255,136,.22)}
+.btn-s:hover{background:rgba(0,255,136,.15)}
+.btn-d{background:rgba(255,51,102,.07);color:var(--danger);border-color:rgba(255,51,102,.22)}
+.btn-d:hover{background:rgba(255,51,102,.15)}
+.btn-sm{padding:5px 11px;font-size:10px}
+
+/* CHART */
+.ch-w{display:flex;align-items:flex-end;gap:5px;height:100px;padding:5px 0}
+.ch-bw{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
+.ch-b{width:100%;border-radius:4px 4px 0 0;cursor:pointer;position:relative;transition:filter .2s}
+.ch-b:hover{filter:brightness(1.4)}
+.ch-b:hover::after{content:attr(data-v);position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+background:rgba(0,212,255,.8);color:#fff;padding:2px 6px;border-radius:4px;font-size:10px;white-space:nowrap}
+.ch-l{font-size:9px;color:rgba(255,255,255,.22)}
+
+/* SUBJECT BARS */
+.sr{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.sn{font-size:11px;width:85px;color:rgba(255,255,255,.4);flex-shrink:0}
+.sb-b{flex:1}
+.ss{font-size:11px;color:#fff;font-weight:700;width:32px;text-align:right}
+
+/* ACTIVITY */
+.ai{display:flex;gap:9px;margin-bottom:12px}
+.ad{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.at h4{font-size:12px;color:#fff;font-weight:600}
+.at p{font-size:10px;color:rgba(255,255,255,.3);margin-top:2px}
+
+/* TOP STUDENTS */
+.ts{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid rgba(0,212,255,.05)}
+.rk{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.rk1{background:linear-gradient(135deg,#FFD700,#FFA500);color:#1a1a1a}
+.rk2{background:linear-gradient(135deg,#C0C0C0,#A0A0A0);color:#1a1a1a}
+.rk3{background:linear-gradient(135deg,#CD7F32,#A05020);color:#fff}
+.rko{background:rgba(0,212,255,.12);color:var(--cyan)}
+
+/* COURSES */
+.cg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.cc{background:var(--card);border:1px solid rgba(0,212,255,.1);
+border-radius:12px;padding:18px;transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
+.cc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+background:linear-gradient(90deg,transparent,rgba(0,212,255,.4),transparent);opacity:0;transition:opacity .25s}
+.cc:hover{border-color:rgba(0,212,255,.32);transform:translateY(-3px);box-shadow:0 12px 35px rgba(0,0,0,.3)}
+.cc:hover::before{opacity:1}
+.cc-ico{font-size:26px;margin-bottom:9px}
+.cc-nm{font-size:14px;font-weight:700;margin-bottom:3px}
+.cc-tc{font-size:11px;color:rgba(0,212,255,.5);margin-bottom:10px;letter-spacing:.5px}
+.cc-ds{font-size:11px;color:rgba(255,255,255,.28);margin-bottom:11px}
+
+/* SCHEDULE */
+.sch-c{border-left:3px solid;border-radius:0 7px 7px 0;padding:7px 9px}
+.sch-s{font-size:11px;font-weight:700}
+.sch-t{font-size:10px;color:rgba(255,255,255,.33)}
+.sch-r{font-size:10px;color:rgba(0,212,255,.45)}
+
+/* ATT */
+.att-r{display:flex;align-items:center;gap:9px;padding:9px;border-radius:9px;
+background:rgba(0,212,255,.03);border:1px solid rgba(0,212,255,.06);margin-bottom:7px}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;
+display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.mo.open{display:flex}
+.md{background:var(--card);border-radius:16px;border:1px solid rgba(0,212,255,.22);
+width:90%;max-width:500px;max-height:90vh;overflow-y:auto;animation:slideUp .3s ease;position:relative}
+.md::before{content:'';display:block;height:2px;
+background:linear-gradient(90deg,transparent,var(--cyan),var(--gold),var(--cyan),transparent);
+background-size:200% auto;animation:shimmer 3s linear infinite}
+.md-h{padding:18px 22px;border-bottom:1px solid rgba(0,212,255,.08);
+display:flex;align-items:center;justify-content:space-between;background:rgba(0,48,135,.08)}
+.md-h h3{font-size:14px;font-weight:700;letter-spacing:1px}
+.md-cl{width:30px;height:30px;background:rgba(255,255,255,.07);
+border:1px solid rgba(255,255,255,.1);border-radius:7px;color:#fff;
+cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.md-cl:hover{background:rgba(255,51,102,.2);border-color:rgba(255,51,102,.4)}
+.md-b{padding:20px 22px}
+.md-f{padding:16px 22px;border-top:1px solid rgba(0,212,255,.07);display:flex;gap:9px;justify-content:flex-end}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:0}
+.fg.fw{grid-column:span 2}
+.fg label{font-size:9px;letter-spacing:2px;color:rgba(0,212,255,.5);font-weight:700;text-transform:uppercase}
+.fg input,.fg select{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.17);
+border-radius:8px;padding:10px 12px;color:#fff;font-size:13px;outline:none;transition:border-color .25s}
+.fg input:focus,.fg select:focus{border-color:var(--cyan)}
+.fg select option{background:#041525}
+
+/* TOAST */
+.tb{position:fixed;top:75px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:9px}
+.tos{background:rgba(2,11,24,.97);border-radius:11px;padding:12px 16px;
+border-left:3px solid;display:flex;align-items:center;gap:9px;
+min-width:260px;box-shadow:0 12px 35px rgba(0,0,0,.5);animation:slideUp .3s ease}
+.tos.success{border-color:var(--success)}
+.tos.danger{border-color:var(--danger)}
+.tos.info{border-color:var(--cyan)}
+.tos.warning{border-color:var(--warning)}
+.tos-t{font-size:12px;color:#fff;font-weight:600;letter-spacing:.5px}
+
+/* REPORTS */
+.rbr{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.rbl{font-size:11px;width:85px;color:rgba(255,255,255,.38);flex-shrink:0}
+
+/* ROLE EXPERIENCE */
+#pg-dash{position:relative}
+#pg-dash::before{content:'';position:fixed;inset:62px 0 0 0;pointer-events:none;
+background:
+radial-gradient(circle at 15% 16%,var(--role-glow,rgba(0,212,255,.16)),transparent 28%),
+radial-gradient(circle at 84% 18%,rgba(255,255,255,.05),transparent 22%),
+radial-gradient(circle at 50% 100%,rgba(255,215,0,.06),transparent 30%);
+opacity:.95}
+.d-ct{position:relative;z-index:1;
+background:linear-gradient(180deg,rgba(0,5,16,.96),rgba(0,5,16,.98))}
+.dn-tabs{gap:4px;overflow-x:auto;scrollbar-width:none}
+.dn-tabs::-webkit-scrollbar{display:none}
+.nav-role-chip{flex-shrink:0}
+.role-chip{display:inline-flex;align-items:center;justify-content:center;
+padding:8px 12px;border-radius:999px;
+border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);
+font-size:10px;letter-spacing:2px;font-weight:700;
+color:var(--role-accent,var(--cyan));box-shadow:0 0 20px var(--role-glow,rgba(0,212,255,.18))}
+.dn-tab .nav-mini,.sb-item .nav-mini{width:24px;height:24px;border-radius:8px;
+display:inline-flex;align-items:center;justify-content:center;
+font-size:9px;font-weight:800;letter-spacing:1px;
+background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);flex-shrink:0}
+.dn-tab .nav-label,.sb-item .nav-label{white-space:nowrap}
+.sb-item.sb-utility{color:rgba(255,255,255,.48)}
+.rd-sub{display:none;animation:fadeIn .3s ease}
+.rd-sub.active{display:block}
+.hero-shell{display:grid;grid-template-columns:1.3fr .9fr;gap:16px;margin-bottom:18px}
+.hero-copy,.hero-panel{position:relative;overflow:hidden;border-radius:18px;padding:22px;
+background:linear-gradient(135deg,rgba(2,11,24,.96),rgba(5,24,40,.84));
+border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 45px rgba(0,0,0,.22)}
+.hero-copy::before,.hero-panel::before{content:'';position:absolute;left:-10%;right:-10%;top:-35px;height:90px;
+background:linear-gradient(90deg,transparent,var(--role-glow,rgba(0,212,255,.18)),transparent);
+transform:rotate(-5deg)}
+.hero-brow{position:relative;font-size:10px;letter-spacing:3px;font-weight:700;
+color:var(--role-accent,var(--cyan));margin-bottom:12px}
+.hero-title{position:relative;font-size:34px;font-weight:900;line-height:1.05;margin-bottom:12px}
+.hero-title span{color:var(--role-accent,var(--cyan))}
+.hero-blurb{position:relative;max-width:560px;font-size:14px;line-height:1.75;
+color:rgba(255,255,255,.6);margin-bottom:18px}
+.hero-tags,.hero-actions{position:relative;display:flex;flex-wrap:wrap;gap:10px}
+.hero-tags{margin-bottom:18px}
+.hero-tag{padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.1);
+background:rgba(255,255,255,.04);font-size:10px;letter-spacing:1.8px;
+color:rgba(255,255,255,.74)}
+.signal-card{position:relative;display:grid;gap:15px;height:100%}
+.signal-number{font-size:48px;font-weight:900;color:#fff;line-height:1}
+.signal-caption{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.42)}
+.signal-meter{height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.signal-fill{height:100%;border-radius:999px;
+background:linear-gradient(90deg,var(--role-accent,var(--cyan)),rgba(255,255,255,.85));
+box-shadow:0 0 22px var(--role-glow,rgba(0,212,255,.18))}
+.signal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.signal-tile{padding:12px;border-radius:14px;background:rgba(255,255,255,.04);
+border:1px solid rgba(255,255,255,.07)}
+.signal-tile strong{display:block;font-size:18px;font-weight:800;margin-bottom:4px}
+.signal-tile span{font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,.45)}
+.spot-grid{display:grid;grid-template-columns:1.25fr .95fr;gap:16px;margin-bottom:18px}
+.radar-flex{display:grid;grid-template-columns:1fr .85fr;gap:16px;align-items:center}
+.radar-wrap{display:flex;align-items:center;justify-content:center;min-height:320px;
+border-radius:18px;background:radial-gradient(circle,rgba(255,255,255,.05),transparent 70%);
+border:1px dashed rgba(255,255,255,.08)}
+#student-radar{width:min(100%,340px);height:auto}
+.data-list,.info-list,.flag-list{display:grid;gap:12px}
+.data-row{display:flex;align-items:center;gap:12px}
+.data-row strong{min-width:108px;font-size:12px;color:#fff}
+.data-row span{font-size:11px;color:rgba(255,255,255,.44)}
+.data-meter{flex:1;height:7px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+.data-fill{height:100%;border-radius:999px;
+background:linear-gradient(90deg,var(--role-accent,var(--cyan)),rgba(255,255,255,.88))}
+.stack-col{display:grid;gap:16px}
+.info-chip,.flag-row,.lock-note{padding:14px;border-radius:14px;background:rgba(255,255,255,.04);
+border:1px solid rgba(255,255,255,.07)}
+.info-chip strong,.flag-row strong{display:block;font-size:12px;color:#fff;margin-bottom:4px}
+.info-chip span,.flag-row span,.lock-note{font-size:11px;line-height:1.6;color:rgba(255,255,255,.5)}
+.flag-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.flag-score{font-size:18px;font-weight:800;color:var(--role-accent,var(--cyan))}
+.metric-slab{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.slab{padding:12px;border-radius:14px;background:rgba(255,255,255,.04);
+border:1px solid rgba(255,255,255,.07)}
+.slab .k{font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,.42);margin-bottom:6px}
+.slab .v{font-size:20px;font-weight:800}
+.feed-row{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.feed-row:last-child,.timeline-row:last-child{border-bottom:none}
+.feed-pin{width:9px;height:9px;border-radius:50%;margin-top:4px;flex-shrink:0;
+background:var(--role-accent,var(--cyan));box-shadow:0 0 14px var(--role-accent,var(--cyan))}
+.feed-copy strong{display:block;font-size:12px;color:#fff;margin-bottom:3px}
+.feed-copy span{font-size:10px;color:rgba(255,255,255,.42)}
+.subject-pill{display:inline-flex;align-items:center;justify-content:center;
+padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.1);font-size:10px;letter-spacing:1.5px;
+color:var(--role-accent,var(--cyan))}
+.timeline-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.timeline-row strong{font-size:12px;color:#fff}
+.timeline-row span{font-size:10px;color:rgba(255,255,255,.42)}
+.timeline-badge{padding:4px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:1px}
+.timeline-badge.present{background:rgba(0,255,136,.1);color:var(--success);border:1px solid rgba(0,255,136,.18)}
+.timeline-badge.absent{background:rgba(255,51,102,.1);color:var(--danger);border:1px solid rgba(255,51,102,.18)}
+.timeline-badge.late{background:rgba(255,184,0,.1);color:var(--warning);border:1px solid rgba(255,184,0,.18)}
+.course-kicker{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.course-badge{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+font-size:10px;font-weight:800;letter-spacing:1px}
+.table-note{font-size:10px;color:rgba(255,255,255,.32)}
+.empty-panel{padding:24px;text-align:center;font-size:12px;letter-spacing:1px;color:rgba(255,255,255,.38)}
+.card .lock-note{margin:0}
+.cc{background:linear-gradient(180deg,rgba(2,11,24,.96),rgba(6,20,34,.88))}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.sg{grid-template-columns:1fr 1fr}.c-row{grid-template-columns:1fr}.cg{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){
+.l-title{font-size:36px}.land-wrap{gap:40px;padding:75px 20px 30px}
+.vbar-links{display:none}.dn-tabs{display:none}.dn-src{display:none}
+.d-sb{position:fixed;left:-230px;top:62px;bottom:0;z-index:150;transition:left .3s}
+.d-sb.open{left:0}.fg2{grid-template-columns:1fr}.fg.fw{grid-column:span 1}
+.nav-role-chip{display:none}.hero-shell,.spot-grid,.radar-flex,.signal-grid,.metric-slab{grid-template-columns:1fr}
+.hero-title{font-size:28px}
+}
+</style>
+</head>
+<body>
+
+<!-- ════ LANDING ════ -->
+<div class="page active" id="pg-land">
+<div class="land-grid"></div>
+
+<div class="vbar">
+  <div class="vbar-em">VIT</div>
+  <div><h1>VIT-AP UNIVERSITY</h1><p>AMARAVATI · ANDHRA PRADESH</p></div>
+  <nav class="vbar-links">
+    <a href="#">ABOUT</a><a href="#">ACADEMICS</a><a href="#">RESEARCH</a>
+    <a href="#">ADMISSIONS</a><a href="#">CAMPUS</a><a href="#">CONTACT</a>
+  </nav>
+</div>
+
+<div class="land-wrap">
+  <!-- TEXT -->
+  <div class="land-text">
+    <div class="l-tag"><div class="l-tag-dot"></div><span>VITAP OFFICIAL STUDENT PORTAL</span></div>
+    <div class="l-title">
+      <span class="t1">HELLOGRAM</span>
+      <span class="t2">STUDENT</span>
+      <span class="t3">MANAGEMENT</span>
+    </div>
+    <p class="l-desc">Next-generation academic management at VIT-AP University. Track grades, attendance, schedules and performance with our holographic interface.</p>
+    <div class="l-stats">
+      <div><div class="l-stat-n">10K+</div><div class="l-stat-l">STUDENTS</div></div>
+      <div style="width:1px;background:rgba(0,212,255,.2);align-self:stretch;margin:0 5px;"></div>
+      <div><div class="l-stat-n">500+</div><div class="l-stat-l">FACULTY</div></div>
+      <div style="width:1px;background:rgba(0,212,255,.2);align-self:stretch;margin:0 5px;"></div>
+      <div><div class="l-stat-n">60+</div><div class="l-stat-l">COURSES</div></div>
+      <div style="width:1px;background:rgba(0,212,255,.2);align-self:stretch;margin:0 5px;"></div>
+      <div><div class="l-stat-n">A+</div><div class="l-stat-l">NAAC GRADE</div></div>
+    </div>
+    <button class="enter-btn" onclick="goTo('pg-login')">
+      <span>ENTER PORTAL</span><span class="arr">→</span>
+    </button>
+    <div class="feat-row">
+      <div class="feat">🎓 Student Portal</div>
+      <div class="feat">📊 Analytics</div>
+      <div class="feat">📅 Timetable</div>
+      <div class="feat">✅ Attendance</div>
+      <div class="feat">📝 Grades</div>
+    </div>
+  </div>
+
+  <!-- HOLOGRAM -->
+  <div class="holo-side">
+    <div class="holo-stage">
+      <div class="h-ring h-ring-1">
+        <div class="h-rdot c" style="transform:translate(-50%,-50%) rotate(0deg) translateY(-167px)"></div>
+        <div class="h-rdot g" style="transform:translate(-50%,-50%) rotate(60deg) translateY(-167px)"></div>
+        <div class="h-rdot c" style="transform:translate(-50%,-50%) rotate(120deg) translateY(-167px)"></div>
+        <div class="h-rdot g" style="transform:translate(-50%,-50%) rotate(180deg) translateY(-167px)"></div>
+        <div class="h-rdot c" style="transform:translate(-50%,-50%) rotate(240deg) translateY(-167px)"></div>
+        <div class="h-rdot g" style="transform:translate(-50%,-50%) rotate(300deg) translateY(-167px)"></div>
+      </div>
+      <div class="h-ring h-ring-2">
+        <div class="h-rdot c" style="transform:translate(-50%,-50%) rotate(30deg) translateY(-129px)"></div>
+        <div class="h-rdot c" style="transform:translate(-50%,-50%) rotate(150deg) translateY(-129px)"></div>
+        <div class="h-rdot c" style="transform:translate(-50%,-50%) rotate(270deg) translateY(-129px)"></div>
+      </div>
+      <div class="h-ring h-ring-3"></div>
+      <div class="h-disc"></div>
+      <div class="h-scan"></div>
+      <div class="h-cor tl"></div><div class="h-cor tr"></div>
+      <div class="h-cor bl"></div><div class="h-cor br"></div>
+      <div class="h-ctr">
+        <div class="h-badge"><span>VIT</span></div>
+        <div class="h-name">VIT-AP</div>
+        <div class="h-sub">UNIVERSITY · AMARAVATI</div>
+        <div class="h-div"></div>
+        <div class="h-photo">
+          <div class="h-pb"></div>
+          <div class="h-pm">
+            <div style="text-align:center">
+              <div class="ph-icon">🎓</div>
+              <div class="ph-txt">STUDENT</div>
+            </div>
+          </div>
+        </div>
+        <div class="h-nm">HELLOGRAM SMS</div>
+        <div class="h-rl">STUDENT MANAGEMENT SYSTEM</div>
+        <div class="h-div"></div>
+        <div class="h-chip"><div class="dot"></div><span>SYSTEM ONLINE</span></div>
+      </div>
+      <div class="h-base"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════ LOGIN ════ -->
+<div class="page" id="pg-login">
+<div class="login-bg"></div>
+<div class="login-vbar">
+  <div class="vb-em">VIT</div>
+  <h2>VIT-AP UNIVERSITY</h2>
+  <span>STUDENT MANAGEMENT PORTAL · AMARAVATI</span>
+</div>
+<div class="login-wrap">
+  <!-- Mini holo -->
+  <div style="animation:float 5s ease-in-out infinite">
+    <div class="holo-stage" style="width:240px;height:300px">
+      <div class="h-ring h-ring-1" style="width:240px;height:240px">
+        <div class="h-rdot c" style="transform:translate(-50%,-50%) rotate(0deg) translateY(-117px)"></div>
+        <div class="h-rdot g" style="transform:translate(-50%,-50%) rotate(90deg) translateY(-117px)"></div>
+        <div class="h-rdot c" style="transform:translate(-50%,-50%) rotate(180deg) translateY(-117px)"></div>
+        <div class="h-rdot g" style="transform:translate(-50%,-50%) rotate(270deg) translateY(-117px)"></div>
+      </div>
+      <div class="h-ring h-ring-2" style="width:180px;height:180px">
+        <div class="h-rdot c" style="transform:translate(-50%,-50%) rotate(45deg) translateY(-87px)"></div>
+        <div class="h-rdot c" style="transform:translate(-50%,-50%) rotate(225deg) translateY(-87px)"></div>
+      </div>
+      <div class="h-ring h-ring-3" style="width:120px;height:120px"></div>
+      <div class="h-disc" style="width:110px;height:110px"></div>
+      <div class="h-scan" style="width:110px;height:110px"></div>
+      <div class="h-cor tl"></div><div class="h-cor tr"></div>
+      <div class="h-cor bl"></div><div class="h-cor br"></div>
+      <div class="h-ctr">
+        <div class="h-badge" style="width:50px;height:50px"><span style="font-size:15px">VIT</span></div>
+        <div class="h-name" style="font-size:15px">VIT-AP</div>
+        <div class="h-sub">SECURE PORTAL</div>
+        <div class="h-div" style="width:80px"></div>
+        <div class="h-chip" style="font-size:8px;padding:3px 10px"><div class="dot"></div><span>ENCRYPTED</span></div>
+      </div>
+      <div class="h-base"></div>
+    </div>
+    <div class="l-info" style="width:240px;margin-top:5px">
+      <div class="lic"><div class="lic-i">🔒</div><div class="lic-l">SECURITY</div><div class="lic-v">256-bit</div></div>
+      <div class="lic"><div class="lic-i">⚡</div><div class="lic-l">UPTIME</div><div class="lic-v">99.9%</div></div>
+      <div class="lic"><div class="lic-i">🏛️</div><div class="lic-l">NAAC</div><div class="lic-v">A+ Grade</div></div>
+      <div class="lic"><div class="lic-i">🌐</div><div class="lic-l">CAMPUS</div><div class="lic-v">Amaravati</div></div>
+    </div>
+  </div>
+
+  <!-- Login Card -->
+  <div class="login-card">
+    <div class="lc-top"></div>
+    <div class="lc-hdr">
+      <div class="lc-logo">VIT</div>
+      <h2>HELLOGRAM</h2>
+      <p>VIT-AP STUDENT MANAGEMENT SYSTEM</p>
+    </div>
+    <div class="lc-body">
+      <div class="l-tabs">
+        <div class="l-tab active" onclick="switchTab('student',this)">STUDENT</div>
+        <div class="l-tab" onclick="switchTab('teacher',this)">TEACHER</div>
+        <div class="l-tab" onclick="switchTab('admin',this)">ADMIN</div>
+      </div>
+      <div class="l-form">
+        <div class="lf-g">
+          <div class="lf-lbl">Registration Number / ID</div>
+          <div class="lf-w"><span class="lf-ico" id="l-ico">ST</span>
+            <input class="lf-inp" id="l-id" type="text" placeholder="e.g. 22BCE1234"></div>
+        </div>
+        <div class="lf-g">
+          <div class="lf-lbl">Password</div>
+          <div class="lf-w"><span class="lf-ico">🔑</span>
+            <input class="lf-inp" id="l-pw" type="password" placeholder="Enter password"></div>
+        </div>
+        <div class="l-row">
+          <label class="l-rem"><input type="checkbox"> Remember me</label>
+          <span class="l-fgt">Forgot password?</span>
+        </div>
+        <button class="l-btn" onclick="doLogin()">⚡ LOGIN TO PORTAL</button>
+        <div class="l-demo">DEMO: ANY ID + ANY PASSWORD</div>
+      </div>
+      <div class="l-back" onclick="goTo('pg-land')">← BACK TO HOME</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════ DASHBOARD ════ -->
+<div class="page" id="pg-dash">
+<div id="rd-shell">
+<nav class="d-nav">
+  <div class="dn-brand">
+    <div class="dn-em">VIT</div>
+    <div class="dn-nm"><h1>HELLOGRAM</h1><span>VIT-AP · ROLE PORTAL</span></div>
+  </div>
+  <div class="ham" id="rd-ham" onclick="toggleSidebar()">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="dn-tabs" id="rd-top-nav"></div>
+  <div class="dn-right">
+    <div class="dn-src"><span style="color:rgba(255,255,255,.3);font-size:11px">Q</span>
+      <input type="text" placeholder="Search students or courses" id="rd-search" oninput="globalSearch()"></div>
+    <div class="role-chip nav-role-chip" id="rd-role-chip">STUDENT COCKPIT</div>
+    <div class="dn-ib" onclick="seedDemo()" title="Load demo">LD</div>
+    <div class="dn-user">
+      <div class="dn-av" id="rd-avatar">ST</div>
+      <div><div class="du-n" id="rd-user-name">STUDENT</div><div class="du-r" id="rd-user-role">PERSONAL VIEW</div></div>
+    </div>
+    <div class="dn-ib" onclick="logout()" title="Logout">OUT</div>
+  </div>
+</nav>
+
+<div class="d-body">
+  <div class="d-sb open" id="rd-sidebar">
+    <div class="sb-hdr"><div class="sb-hdr-t">ROLE NAVIGATION</div></div>
+    <div id="rd-sidebar-nav"></div>
+    <div class="sb-sec">UTILITY</div>
+    <div class="sb-item sb-utility" onclick="seedDemo()"><span class="sb-ico">LD</span><span>Load Demo Data</span></div>
+    <div class="sb-item sb-utility" onclick="clearAll()"><span class="sb-ico">CL</span><span>Clear Data</span></div>
+    <div class="sb-item sb-utility" onclick="logout()"><span class="sb-ico">BY</span><span>Logout</span></div>
+    <div class="sb-ft">
+      <div class="sb-ft-in">
+        <div class="sb-ft-ico" id="rd-sidebar-tag">ST</div>
+        <div><div class="sb-ft-n" id="rd-sidebar-name">STUDENT</div><div class="sb-ft-i" id="rd-sidebar-meta">READY</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-ct">
+    <div class="rd-sub active" id="rd-home">
+      <div id="rd-home-content"></div>
+    </div>
+
+    <div class="rd-sub" id="rd-students">
+      <div class="p-ban">
+        <div><div class="pb-t" id="rd-students-title">STUDENTS</div><div class="pb-s" id="rd-students-subtitle">VIEW AND TRACK LEARNERS</div></div>
+        <div class="pb-r" id="rd-students-actions"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3 id="rd-students-table-title">STUDENT DIRECTORY</h3>
+          <input type="text" id="rd-students-search" placeholder="Search students" oninput="renderStudentRegistry()"
+            style="background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.16);border-radius:8px;
+            padding:7px 12px;color:#fff;font-size:12px;outline:none;width:190px"></div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead id="rd-students-head"></thead>
+            <tbody id="rd-students-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="rd-sub" id="rd-courses">
+      <div class="p-ban">
+        <div><div class="pb-t" id="rd-courses-title">COURSES</div><div class="pb-s" id="rd-courses-subtitle">ACADEMIC TRACKS AND OWNERS</div></div>
+        <div class="pb-r" id="rd-course-actions"></div>
+      </div>
+      <div class="cg" id="rd-courses-grid"></div>
+    </div>
+
+    <div class="rd-sub" id="rd-grades">
+      <div class="p-ban">
+        <div><div class="pb-t" id="rd-grades-title">MARKS CENTER</div><div class="pb-s" id="rd-grades-subtitle">ACADEMIC PERFORMANCE GRID</div></div>
+        <div class="pb-r" id="rd-grades-actions"></div>
+      </div>
+      <div class="c-row">
+        <div class="card">
+          <div class="card-h"><h3 id="rd-grades-table-title">MARK RECORDS</h3></div>
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <thead id="rd-grades-head"></thead>
+              <tbody id="rd-grades-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3 id="rd-grades-side-title">CLASS SIGNALS</h3></div>
+          <div class="card-b" id="rd-grades-side"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rd-sub" id="rd-attendance">
+      <div class="p-ban">
+        <div><div class="pb-t" id="rd-att-title">ATTENDANCE</div><div class="pb-s" id="rd-att-subtitle">TRACK PRESENCE AND PUNCTUALITY</div></div>
+        <div class="pb-r" id="rd-att-actions"></div>
+      </div>
+      <div class="c-row">
+        <div class="card">
+          <div class="card-h"><h3 id="rd-att-main-title">ATTENDANCE</h3>
+            <div id="rd-att-date-wrap">
+              <input type="date" id="rd-att-date" style="background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.16);
+              border-radius:8px;padding:6px 11px;color:#fff;font-size:12px;outline:none">
+            </div>
+          </div>
+          <div class="card-b">
+            <div id="rd-att-list" style="display:flex;flex-direction:column;max-height:360px;overflow-y:auto"></div>
+            <button class="btn btn-s" id="rd-att-save" style="width:100%;margin-top:13px;justify-content:center" onclick="saveAttendance()">SAVE ATTENDANCE</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3 id="rd-att-side-title">ATTENDANCE OVERVIEW</h3></div>
+          <div class="card-b" id="rd-att-overview"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rd-sub" id="rd-schedule">
+      <div class="p-ban">
+        <div><div class="pb-t" id="rd-schedule-title">SCHEDULE</div><div class="pb-s" id="rd-schedule-subtitle">WEEKLY FLOW</div></div>
+        <div class="pb-r" id="rd-schedule-actions"></div>
+      </div>
+      <div class="card">
+        <div style="overflow-x:auto">
+          <table class="tbl" style="min-width:650px">
+            <thead><tr><th>TIME</th><th>MON</th><th>TUE</th><th>WED</th><th>THU</th><th>FRI</th></tr></thead>
+            <tbody id="rd-schedule-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="rd-sub" id="rd-reports">
+      <div class="p-ban">
+        <div><div class="pb-t">REPORTS</div><div class="pb-s">ANALYTICS AND INSIGHTS</div></div>
+        <div class="pb-r"><button class="btn btn-s" onclick="exportCSV()">EXPORT CSV</button></div>
+      </div>
+      <div class="sg">
+        <div class="sc"><div class="sc-top"><div class="sc-iw" style="background:rgba(0,212,255,.1)">AN</div></div><div class="sc-n" id="rd-report-total">0</div><div class="sc-l">TOTAL STUDENTS</div></div>
+        <div class="sc"><div class="sc-top"><div class="sc-iw" style="background:rgba(123,47,255,.1)">AV</div></div><div class="sc-n" id="rd-report-avg">N/A</div><div class="sc-l">AVG GRADE</div></div>
+        <div class="sc"><div class="sc-top"><div class="sc-iw" style="background:rgba(0,255,136,.1)">AT</div></div><div class="sc-n" id="rd-report-att">0%</div><div class="sc-l">ATTENDANCE RATE</div></div>
+        <div class="sc"><div class="sc-top"><div class="sc-iw" style="background:rgba(255,215,0,.1)">PS</div></div><div class="sc-n" id="rd-report-pass">0</div><div class="sc-l">PASSING STUDENTS</div></div>
+      </div>
+      <div class="c-row">
+        <div class="card">
+          <div class="card-h"><h3>PERFORMANCE REPORT</h3></div>
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <thead><tr><th>STUDENT</th><th>AVG GRADE</th><th>ATTENDANCE</th><th>PERFORMANCE</th></tr></thead>
+              <tbody id="rd-report-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>CLASS DISTRIBUTION</h3></div>
+          <div class="card-b" id="rd-class-dist"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div id="legacy-dash" style="display:none">
+
+<!-- TOP NAV -->
+<nav class="d-nav">
+  <div class="dn-brand">
+    <div class="dn-em">VIT</div>
+    <div class="dn-nm"><h1>HELLOGRAM</h1><span>VITAP · SMS</span></div>
+  </div>
+  <div class="ham" id="ham" onclick="toggleSB()">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="dn-tabs">
+    <div class="dn-tab active" onclick="showSub('s-home',this)"><span class="ti">📊</span> DASHBOARD</div>
+    <div class="dn-tab" onclick="showSub('s-students',this)"><span class="ti">👨‍🎓</span> STUDENTS</div>
+    <div class="dn-tab" onclick="showSub('s-courses',this)"><span class="ti">📚</span> COURSES</div>
+    <div class="dn-tab" onclick="showSub('s-grades',this)"><span class="ti">📝</span> GRADES</div>
+    <div class="dn-tab" onclick="showSub('s-reports',this)"><span class="ti">📈</span> REPORTS</div>
+  </div>
+  <div class="dn-right">
+    <div class="dn-src"><span style="color:rgba(255,255,255,.3);font-size:12px">🔍</span>
+      <input type="text" placeholder="Search..." id="g-src" oninput="gSearch()"></div>
+    <div class="dn-ib" onclick="toast('3 new notifications','info')">🔔<span class="n-dot"></span></div>
+    <div class="dn-ib" onclick="seedDemo()" title="Load Demo">🔄</div>
+    <div class="dn-user">
+      <div class="dn-av" id="d-av">A</div>
+      <div><div class="du-n" id="d-un">ADMIN</div><div class="du-r" id="d-ur">ADMINISTRATOR</div></div>
+    </div>
+    <div class="dn-ib" onclick="logout()" title="Logout">🚪</div>
+  </div>
+</nav>
+
+<div class="d-body">
+<!-- SIDEBAR -->
+<div class="d-sb open" id="d-sb">
+  <div class="sb-hdr"><div class="sb-hdr-t">NAVIGATION</div></div>
+  <div class="sb-sec">MAIN</div>
+  <div class="sb-item active" onclick="showSub('s-home',null,this)"><span class="sb-ico">📊</span><span>Dashboard</span></div>
+  <div class="sb-item" onclick="showSub('s-students',null,this)"><span class="sb-ico">👨‍🎓</span><span>Students</span><span class="sb-badge" id="sb-cnt">0</span></div>
+  <div class="sb-item" onclick="showSub('s-courses',null,this)"><span class="sb-ico">📚</span><span>Courses</span></div>
+  <div class="sb-item" onclick="showSub('s-grades',null,this)"><span class="sb-ico">📝</span><span>Grades</span></div>
+  <div class="sb-sec">MANAGEMENT</div>
+  <div class="sb-item" onclick="showSub('s-att',null,this)"><span class="sb-ico">✅</span><span>Attendance</span></div>
+  <div class="sb-item" onclick="showSub('s-sch',null,this)"><span class="sb-ico">📅</span><span>Schedule</span></div>
+  <div class="sb-item" onclick="showSub('s-reports',null,this)"><span class="sb-ico">📈</span><span>Reports</span></div>
+  <div class="sb-sec">SYSTEM</div>
+  <div class="sb-item" onclick="seedDemo()"><span class="sb-ico">🔄</span><span>Load Demo Data</span></div>
+  <div class="sb-item" onclick="clearAll()"><span class="sb-ico">🗑️</span><span>Clear Data</span></div>
+  <div class="sb-item" onclick="logout()"><span class="sb-ico">🚪</span><span>Logout</span></div>
+  <div class="sb-ft">
+    <div class="sb-ft-in">
+      <div class="sb-ft-ico">🎓</div>
+      <div><div class="sb-ft-n" id="sb-nm">ADMIN</div><div class="sb-ft-i" id="sb-id">VITAP · 2024</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="d-ct">
+
+<!-- HOME -->
+<div class="sub active" id="s-home">
+  <div class="p-ban">
+    <div><div class="pb-t">DASHBOARD</div><div class="pb-s">VITAP UNIVERSITY · STUDENT MANAGEMENT</div></div>
+    <div class="pb-r">
+      <button class="btn btn-g" onclick="seedDemo()">🔄 LOAD DEMO</button>
+      <button class="btn btn-p" onclick="openM('m-add-s')">➕ ADD STUDENT</button>
+    </div>
+  </div>
+  <div class="sg">
+    <div class="sc"><div class="sc-gb" style="background:var(--cyan)"></div>
+      <div class="sc-top"><div class="sc-iw" style="background:rgba(0,212,255,.1)">👨‍🎓</div><div class="sc-tr up">↑ 12%</div></div>
+      <div class="sc-n" id="d-tot">0</div><div class="sc-l">TOTAL STUDENTS</div></div>
+    <div class="sc"><div class="sc-gb" style="background:var(--success)"></div>
+      <div class="sc-top"><div class="sc-iw" style="background:rgba(0,255,136,.1)">✅</div><div class="sc-tr up">↑ 5%</div></div>
+      <div class="sc-n" id="d-pre">0</div><div class="sc-l">PRESENT TODAY</div></div>
+    <div class="sc"><div class="sc-gb" style="background:var(--gold)"></div>
+      <div class="sc-top"><div class="sc-iw" style="background:rgba(255,215,0,.1)">📚</div><div class="sc-tr up">↑ 2</div></div>
+      <div class="sc-n">8</div><div class="sc-l">ACTIVE COURSES</div></div>
+    <div class="sc"><div class="sc-gb" style="background:var(--purple)"></div>
+      <div class="sc-top"><div class="sc-iw" style="background:rgba(123,47,255,.1)">🏆</div><div class="sc-tr dn">↓ 2%</div></div>
+      <div class="sc-n" id="d-avg">N/A</div><div class="sc-l">AVERAGE GRADE</div></div>
+  </div>
+  <div class="c-row">
+    <div class="card">
+      <div class="card-h"><h3>RECENT STUDENTS</h3>
+        <button class="btn btn-p btn-sm" onclick="showSub('s-students')">VIEW ALL →</button></div>
+      <table class="tbl"><thead><tr><th>STUDENT</th><th>GRADE</th><th>STATUS</th></tr></thead>
+        <tbody id="d-rtb"></tbody></table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-h"><h3>SUBJECT AVERAGES</h3></div>
+        <div class="card-b">
+          <div class="sr"><span class="sn">Mathematics</span><div class="sb-b"><div class="pb"><div class="pf" style="width:78%;background:linear-gradient(to right,var(--cyan),#0066FF)"></div></div></div><span class="ss">78%</span></div>
+          <div class="sr"><span class="sn">Physics</span><div class="sb-b"><div class="pb"><div class="pf" style="width:85%;background:linear-gradient(to right,var(--success),#00CC66)"></div></div></div><span class="ss">85%</span></div>
+          <div class="sr"><span class="sn">Chemistry</span><div class="sb-b"><div class="pb"><div class="pf" style="width:72%;background:linear-gradient(to right,var(--warning),#FF8C00)"></div></div></div><span class="ss">72%</span></div>
+          <div class="sr"><span class="sn">Comp. Sci.</span><div class="sb-b"><div class="pb"><div class="pf" style="width:91%;background:linear-gradient(to right,var(--purple),#5500FF)"></div></div></div><span class="ss">91%</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>LIVE ACTIVITY</h3></div>
+        <div class="card-b"><div id="act-feed">
+          <div class="ai"><div class="ad" style="background:var(--cyan)"></div><div class="at"><h4>System Ready</h4><p>Just now</p></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><h3>MONTHLY ENROLLMENT — 2024</h3>
+      <span style="font-size:10px;color:rgba(255,215,0,.5);letter-spacing:2px">VITAP UNIVERSITY</span></div>
+    <div class="card-b">
+      <div class="ch-w" id="e-chart"></div>
+      <div style="display:flex;gap:5px;margin-top:7px" id="e-labels"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENTS -->
+<div class="sub" id="s-students">
+  <div class="p-ban">
+    <div><div class="pb-t">STUDENTS</div><div class="pb-s">MANAGE · VIEW · TRACK</div></div>
+    <div class="pb-r">
+      <button class="btn btn-sm btn-p" onclick="filterStu('all',this)">ALL</button>
+      <button class="btn btn-sm btn-s" onclick="filterStu('active',this)">ACTIVE</button>
+      <button class="btn btn-sm btn-w" onclick="filterStu('inactive',this)" style="background:rgba(255,184,0,.07);color:var(--warning);border-color:rgba(255,184,0,.22)">INACTIVE</button>
+      <button class="btn btn-sm btn-g" onclick="filterStu('graduated',this)">GRADUATED</button>
+      <button class="btn btn-p" onclick="openM('m-add-s')">➕ ADD STUDENT</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><h3>STUDENT REGISTRY</h3>
+      <input type="text" id="s-src" placeholder="Search..." oninput="renderS()"
+        style="background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.16);border-radius:8px;
+        padding:7px 12px;color:#fff;font-size:12px;outline:none;width:170px"></div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>STUDENT</th><th>CLASS</th><th>AVG GRADE</th><th>ATTENDANCE</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
+        <tbody id="s-tb"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- COURSES -->
+<div class="sub" id="s-courses">
+  <div class="p-ban">
+    <div><div class="pb-t">COURSES</div><div class="pb-s">VITAP ACADEMIC PROGRAMMES</div></div>
+    <div class="pb-r"><button class="btn btn-p" onclick="openM('m-add-c')">➕ ADD COURSE</button></div>
+  </div>
+  <div class="cg" id="cg"></div>
+</div>
+
+<!-- GRADES -->
+<div class="sub" id="s-grades">
+  <div class="p-ban">
+    <div><div class="pb-t">GRADES</div><div class="pb-s">ACADEMIC PERFORMANCE</div></div>
+    <div class="pb-r"><button class="btn btn-p" onclick="openM('m-add-g')">➕ ADD GRADE</button></div>
+  </div>
+  <div class="c-row">
+    <div class="card">
+      <div class="card-h"><h3>GRADE RECORDS</h3></div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>STUDENT</th><th>SUBJECT</th><th>SCORE</th><th>GRADE</th><th>DATE</th></tr></thead>
+          <tbody id="g-tb"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>🏆 LEADERBOARD</h3></div>
+      <div class="card-b" id="top-s"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ATTENDANCE -->
+<div class="sub" id="s-att">
+  <div class="p-ban">
+    <div><div class="pb-t">ATTENDANCE</div><div class="pb-s">DAILY TRACKING</div></div>
+  </div>
+  <div class="c-row">
+    <div class="card">
+      <div class="card-h"><h3>MARK ATTENDANCE</h3>
+        <input type="date" id="att-dt" style="background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.16);
+        border-radius:8px;padding:6px 11px;color:#fff;font-size:12px;outline:none"></div>
+      <div class="card-b">
+        <div id="att-list" style="display:flex;flex-direction:column;max-height:340px;overflow-y:auto"></div>
+        <button class="btn btn-s" style="width:100%;margin-top:13px;justify-content:center" onclick="saveAtt()">💾 SAVE ATTENDANCE</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>ATTENDANCE OVERVIEW</h3></div>
+      <div class="card-b" id="att-ov"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="sub" id="s-sch">
+  <div class="p-ban">
+    <div><div class="pb-t">SCHEDULE</div><div class="pb-s">WEEKLY TIMETABLE</div></div>
+    <div class="pb-r"><button class="btn btn-p" onclick="openM('m-add-sch')">➕ ADD CLASS</button></div>
+  </div>
+  <div class="card">
+    <div style="overflow-x:auto">
+      <table class="tbl" style="min-width:650px">
+        <thead><tr><th>TIME</th><th>MON</th><th>TUE</th><th>WED</th><th>THU</th><th>FRI</th></tr></thead>
+        <tbody id="sch-tb"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- REPORTS -->
+<div class="sub" id="s-reports">
+  <div class="p-ban">
+    <div><div class="pb-t">REPORTS</div><div class="pb-s">ANALYTICS & INSIGHTS</div></div>
+    <div class="pb-r"><button class="btn btn-s" onclick="exportCSV()">📥 EXPORT CSV</button></div>
+  </div>
+  <div class="sg">
+    <div class="sc"><div class="sc-top"><div class="sc-iw" style="background:rgba(0,212,255,.1)">📊</div></div><div class="sc-n" id="r-tot">0</div><div class="sc-l">TOTAL STUDENTS</div></div>
+    <div class="sc"><div class="sc-top"><div class="sc-iw" style="background:rgba(123,47,255,.1)">📈</div></div><div class="sc-n" id="r-avg">N/A</div><div class="sc-l">AVG GRADE</div></div>
+    <div class="sc"><div class="sc-top"><div class="sc-iw" style="background:rgba(0,255,136,.1)">✅</div></div><div class="sc-n" id="r-att">0%</div><div class="sc-l">ATTENDANCE RATE</div></div>
+    <div class="sc"><div class="sc-top"><div class="sc-iw" style="background:rgba(255,215,0,.1)">🏅</div></div><div class="sc-n" id="r-pas">0</div><div class="sc-l">PASSING STUDENTS</div></div>
+  </div>
+  <div class="c-row">
+    <div class="card">
+      <div class="card-h"><h3>PERFORMANCE REPORT</h3></div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>STUDENT</th><th>AVG GRADE</th><th>ATTENDANCE</th><th>PERFORMANCE</th></tr></thead>
+          <tbody id="r-tb"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>CLASS DISTRIBUTION</h3></div>
+      <div class="card-b" id="cls-dist"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /d-ct -->
+</div><!-- /d-body -->
+</div>
+</div><!-- /pg-dash -->
+
+<!-- MODALS -->
+<!-- Add Student -->
+<div class="mo" id="m-add-s">
+  <div class="md">
+    <div class="md-h"><h3>➕ ADD STUDENT</h3><button class="md-cl" onclick="closeM('m-add-s')">✕</button></div>
+    <div class="md-b">
+      <div class="fg2">
+        <div class="fg"><label>First Name *</label><input id="s-fn" type="text" placeholder="Arjun"></div>
+        <div class="fg"><label>Last Name *</label><input id="s-ln" type="text" placeholder="Sharma"></div>
+        <div class="fg"><label>Email</label><input id="s-em" type="email" placeholder="arjun@vitap.ac.in"></div>
+        <div class="fg"><label>Phone</label><input id="s-ph" type="tel" placeholder="+91 9876543210"></div>
+        <div class="fg"><label>Programme</label>
+          <select id="s-cl"><option>1st Year B.Tech</option><option>2nd Year B.Tech</option>
+          <option>3rd Year B.Tech</option><option>4th Year B.Tech</option>
+          <option>M.Tech 1st Year</option><option>Grade 11</option><option>Grade 12</option></select></div>
+        <div class="fg"><label>Status</label>
+          <select id="s-st"><option value="active">Active</option>
+          <option value="inactive">Inactive</option><option value="graduated">Graduated</option></select></div>
+        <div class="fg fw"><label>Register Number</label><input id="s-rg" type="text" placeholder="22BCE1234"></div>
+        <div class="fg fw"><label>Parent Name</label><input id="s-pr" type="text" placeholder="Parent Name"></div>
+      </div>
+    </div>
+    <div class="md-f">
+      <button class="btn btn-d" onclick="closeM('m-add-s')">CANCEL</button>
+      <button class="btn btn-p" onclick="addStudent()">✓ ADD STUDENT</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Student -->
+<div class="mo" id="m-edit-s">
+  <div class="md">
+    <div class="md-h"><h3>✏️ EDIT STUDENT</h3><button class="md-cl" onclick="closeM('m-edit-s')">✕</button></div>
+    <div class="md-b">
+      <input type="hidden" id="e-id">
+      <div class="fg2">
+        <div class="fg"><label>First Name</label><input id="e-fn" type="text"></div>
+        <div class="fg"><label>Last Name</label><input id="e-ln" type="text"></div>
+        <div class="fg"><label>Email</label><input id="e-em" type="email"></div>
+        <div class="fg"><label>Phone</label><input id="e-ph" type="tel"></div>
+        <div class="fg"><label>Programme</label>
+          <select id="e-cl"><option>1st Year B.Tech</option><option>2nd Year B.Tech</option>
+          <option>3rd Year B.Tech</option><option>4th Year B.Tech</option>
+          <option>M.Tech 1st Year</option><option>Grade 11</option><option>Grade 12</option></select></div>
+        <div class="fg"><label>Status</label>
+          <select id="e-st"><option value="active">Active</option>
+          <option value="inactive">Inactive</option><option value="graduated">Graduated</option></select></div>
+        <div class="fg fw"><label>Register Number</label><input id="e-rg" type="text"></div>
+        <div class="fg fw"><label>Parent Name</label><input id="e-pr" type="text"></div>
+      </div>
+    </div>
+    <div class="md-f">
+      <button class="btn btn-d" onclick="closeM('m-edit-s')">CANCEL</button>
+      <button class="btn btn-p" onclick="updateS()">💾 UPDATE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Grade -->
+<div class="mo" id="m-add-g">
+  <div class="md">
+    <div class="md-h"><h3>📝 ADD GRADE</h3><button class="md-cl" onclick="closeM('m-add-g')">✕</button></div>
+    <div class="md-b" style="display:flex;flex-direction:column;gap:13px">
+      <div class="fg"><label>Student</label><select id="g-stu"></select></div>
+      <div class="fg"><label>Subject</label>
+        <select id="g-sbj"><option>Mathematics</option><option>Physics</option><option>Chemistry</option>
+        <option>Biology</option><option>English</option><option>Computer Science</option>
+        <option>Data Structures</option><option>Algorithms</option></select></div>
+      <div class="fg"><label>Score (0–100)</label><input id="g-sc" type="number" min="0" max="100" placeholder="85"></div>
+      <div class="fg"><label>Date</label><input id="g-dt" type="date"></div>
+      <div class="fg"><label>Notes</label><input id="g-nt" type="text" placeholder="Mid Semester Exam..."></div>
+    </div>
+    <div class="md-f">
+      <button class="btn btn-d" onclick="closeM('m-add-g')">CANCEL</button>
+      <button class="btn btn-p" onclick="addGrade()">✓ ADD GRADE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Course -->
+<div class="mo" id="m-add-c">
+  <div class="md">
+    <div class="md-h"><h3>📚 ADD COURSE</h3><button class="md-cl" onclick="closeM('m-add-c')">✕</button></div>
+    <div class="md-b" style="display:flex;flex-direction:column;gap:13px">
+      <div class="fg"><label>Course Name</label><input id="c-nm" type="text" placeholder="Advanced Mathematics"></div>
+      <div class="fg"><label>Faculty</label><input id="c-tc" type="text" placeholder="Dr. Smith"></div>
+      <div class="fg"><label>Icon (Emoji)</label><input id="c-ic" type="text" placeholder="📐" maxlength="2"></div>
+      <div class="fg"><label>Description</label><input id="c-ds" type="text" placeholder="Course description..."></div>
+    </div>
+    <div class="md-f">
+      <button class="btn btn-d" onclick="closeM('m-add-c')">CANCEL</button>
+      <button class="btn btn-p" onclick="addCourse()">✓ ADD COURSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Schedule -->
+<div class="mo" id="m-add-sch">
+  <div class="md">
+    <div class="md-h"><h3>📅 ADD CLASS</h3><button class="md-cl" onclick="closeM('m-add-sch')">✕</button></div>
+    <div class="md-b">
+      <div class="fg2">
+        <div class="fg"><label>Time</label>
+          <select id="sc-t"><option>08:00 AM</option><option>09:00 AM</option><option>10:00 AM</option>
+          <option>11:00 AM</option><option>12:00 PM</option><option>01:00 PM</option>
+          <option>02:00 PM</option><option>03:00 PM</option></select></div>
+        <div class="fg"><label>Day</label>
+          <select id="sc-d"><option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+          <option>Thursday</option><option>Friday</option></select></div>
+        <div class="fg"><label>Subject</label><input id="sc-s" type="text" placeholder="Mathematics"></div>
+        <div class="fg"><label>Faculty</label><input id="sc-tc" type="text" placeholder="Dr. Smith"></div>
+        <div class="fg fw"><label>Room</label><input id="sc-r" type="text" placeholder="LH-101"></div>
+      </div>
+    </div>
+    <div class="md-f">
+      <button class="btn btn-d" onclick="closeM('m-add-sch')">CANCEL</button>
+      <button class="btn btn-p" onclick="addSch()">✓ ADD CLASS</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete -->
+<div class="mo" id="m-del">
+  <div class="md" style="max-width:360px">
+    <div class="md-h"><h3>⚠️ CONFIRM DELETE</h3><button class="md-cl" onclick="closeM('m-del')">✕</button></div>
+    <div class="md-b" style="text-align:center;padding:30px 22px">
+      <div style="font-size:50px;margin-bottom:13px">🗑️</div>
+      <h3 style="font-size:15px;margin-bottom:8px">Delete this student?</h3>
+      <p style="font-size:11px;color:rgba(255,255,255,.3);letter-spacing:1px">This action cannot be undone.</p>
+    </div>
+    <div class="md-f">
+      <button class="btn" onclick="closeM('m-del')" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.55);border-color:rgba(255,255,255,.1)">CANCEL</button>
+      <button class="btn btn-d" id="del-btn">🗑️ DELETE</button>
+    </div>
+  </div>
+</div>
+
+<div class="tb" id="tb"></div>
+
+<script>
+// ── STATE ──
+const S={students:[],grades:[],courses:[],schedule:[],attendance:{},nid:1,filter:'all',role:'student'};
+const C=['#00D4FF','#7B2FFF','#00FF88','#FFB800','#FF3366','#FF6B35','#00BFFF','#FFD700'];
+const SC={'Mathematics':'#00D4FF','Physics':'#00FF88','Chemistry':'#FF3366','Biology':'#00BFFF','English':'#FFB800','Computer Science':'#7B2FFF','Data Structures':'#FF6B35','Algorithms':'#FFD700'};
+
+// ── UTILS ──
+function gc(n){return C[(n.charCodeAt(0)+(n.charCodeAt(n.length-1)||0))%C.length]}
+function ini(f,l){return(f[0]||'')+(l[0]||'')}
+function avg(id){const g=S.grades.filter(x=>x.sid===id);return g.length?Math.round(g.reduce((a,b)=>a+b.score,0)/g.length):null}
+function att(id){let p=0,t=0;Object.values(S.attendance).forEach(r=>{if(r[id]!==undefined){t++;if(r[id]==='present'||r[id]==='late')p++}});return t?Math.round(p/t*100):100}
+function lg(s){if(s>=90)return{l:'A+',c:'bs'};if(s>=80)return{l:'A',c:'bs'};if(s>=70)return{l:'B',c:'bi'};if(s>=60)return{l:'C',c:'bw'};return{l:'F',c:'bd'}}
+function calAvg(){return S.grades.length?Math.round(S.grades.reduce((a,b)=>a+b.score,0)/S.grades.length):null}
+function badge(){document.getElementById('sb-cnt').textContent=S.students.length}
+function addAct(t){const f=document.getElementById('act-feed'),d=document.createElement('div');d.className='ai';d.innerHTML=`<div class="ad" style="background:var(--cyan)"></div><div class="at"><h4>${t}</h4><p>Just now</p></div>`;f.insertBefore(d,f.firstChild);if(f.children.length>7)f.removeChild(f.lastChild)}
+
+// ── TOAST ──
+function toast(msg,type='success'){
+  const icons={success:'✅',danger:'❌',warning:'⚠️',info:'ℹ️'};
+  const box=document.getElementById('tb');
+  const t=document.createElement('div');t.className=`tos ${type}`;
+  t.innerHTML=`<span style="font-size:16px">${icons[type]}</span><span class="tos-t">${msg}</span>`;
+  box.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(100px)';t.style.transition='all .3s';setTimeout(()=>t.remove(),300)},3500);
+}
+
+// ── PAGES ──
+function goTo(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='pg-dash'){refreshDash();renderSch();renderCourses()}}
+function logout(){goTo('pg-land');toast('Logged out','info')}
+function doLogin(){
+  const id=document.getElementById('l-id').value.trim(),pw=document.getElementById('l-pw').value.trim();
+  if(!id||!pw){toast('Enter your credentials','warning');return}
+  document.getElementById('d-av').textContent=id[0].toUpperCase();
+  document.getElementById('d-un').textContent=id.toUpperCase();
+  document.getElementById('d-ur').textContent=S.role.toUpperCase();
+  document.getElementById('sb-nm').textContent=id.toUpperCase();
+  document.getElementById('sb-id').textContent='VITAP · 2024';
+  toast(`Welcome ${id.toUpperCase()}!`,'success');
+  goTo('pg-dash');
+}
+function switchTab(r,el){S.role=r;document.querySelectorAll('.l-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');const ic={student:'🎓',faculty:'👨‍🏫',admin:'🔐'},ph={student:'e.g. 22BCE1234',faculty:'e.g. FAC001',admin:'e.g. ADMIN'};document.getElementById('l-ico').textContent=ic[r];document.getElementById('l-id').placeholder=ph[r]}
+
+// ── SIDEBAR ──
+function toggleSB(){
+  const sb=document.getElementById('d-sb'),h=document.getElementById('ham');
+  if(window.innerWidth<=768){sb.classList.toggle('open')}
+  else{sb.classList.toggle('closed')}
+  h.classList.toggle('open');
+}
+
+// ── SUB PAGES ──
+function showSub(id,topEl,sbEl){
+  document.querySelectorAll('.sub').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(topEl){document.querySelectorAll('.dn-tab').forEach(t=>t.classList.remove('active'));topEl.classList.add('active')}
+  if(sbEl){document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));sbEl.classList.add('active')}
+  const fn={'s-home':refreshDash,'s-students':renderS,'s-courses':renderCourses,'s-grades':()=>{popGSel();renderG();renderTop()},'s-att':()=>{renderAttList();renderAttOv()},'s-sch':renderSch,'s-reports':renderReports};
+  if(fn[id])fn[id]();
+  if(window.innerWidth<=768)document.getElementById('d-sb').classList.remove('open');
+}
+
+// ── MODAL ──
+function openM(id){document.getElementById(id).classList.add('open');if(id==='m-add-g')popGSel()}
+function closeM(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+
+// ── STUDENTS ──
+function addStudent(){
+  const fn=document.getElementById('s-fn').value.trim(),ln=document.getElementById('s-ln').value.trim();
+  if(!fn||!ln){toast('Name required','danger');return}
+  const id=S.nid++;
+  S.students.push({id,firstName:fn,lastName:ln,email:document.getElementById('s-em').value.trim(),phone:document.getElementById('s-ph').value.trim(),class:document.getElementById('s-cl').value,status:document.getElementById('s-st').value,reg:document.getElementById('s-rg').value.trim()||`22BCE${String(id).padStart(4,'0')}`,parent:document.getElementById('s-pr').value.trim()});
+  closeM('m-add-s');
+  ['s-fn','s-ln','s-em','s-ph','s-rg','s-pr'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''});
+  renderS();badge();refreshDash();addAct(`${fn} ${ln} enrolled`);toast(`${fn} ${ln} added!`,'success');
+}
+function editS(id){
+  const s=S.students.find(x=>x.id===id);if(!s)return;
+  document.getElementById('e-id').value=id;
+  document.getElementById('e-fn').value=s.firstName;document.getElementById('e-ln').value=s.lastName;
+  document.getElementById('e-em').value=s.email;document.getElementById('e-ph').value=s.phone;
+  document.getElementById('e-cl').value=s.class;document.getElementById('e-st').value=s.status;
+  document.getElementById('e-rg').value=s.reg;document.getElementById('e-pr').value=s.parent||'';
+  openM('m-edit-s');
+}
+function updateS(){
+  const id=parseInt(document.getElementById('e-id').value),s=S.students.find(x=>x.id===id);if(!s)return;
+  s.firstName=document.getElementById('e-fn').value;s.lastName=document.getElementById('e-ln').value;
+  s.email=document.getElementById('e-em').value;s.phone=document.getElementById('e-ph').value;
+  s.class=document.getElementById('e-cl').value;s.status=document.getElementById('e-st').value;
+  s.reg=document.getElementById('e-rg').value;s.parent=document.getElementById('e-pr').value;
+  closeM('m-edit-s');renderS();refreshDash();toast(`${s.firstName} updated!`,'info');
+}
+function delS(id){
+  document.getElementById('del-btn').onclick=()=>{
+    const s=S.students.find(x=>x.id===id);S.students=S.students.filter(x=>x.id!==id);S.grades=S.grades.filter(x=>x.sid!==id);
+    closeM('m-del');renderS();badge();refreshDash();if(s)toast(`${s.firstName} deleted`,'danger');
+  };openM('m-del');
+}
+function filterStu(f){S.filter=f;renderS()}
+function renderS(){
+  const tb=document.getElementById('s-tb');
+  let list=S.students;
+  if(S.filter!=='all')list=list.filter(s=>s.status===S.filter);
+  const q=(document.getElementById('s-src')?.value||'').toLowerCase();
+  if(q)list=list.filter(s=>(s.firstName+' '+s.lastName+s.reg+s.class).toLowerCase().includes(q));
+  if(!list.length){tb.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:30px;color:rgba(0,212,255,.3);letter-spacing:2px">NO STUDENTS FOUND</td></tr>`;return}
+  const sm={active:'bs',inactive:'bw',graduated:'bg'};
+  tb.innerHTML=list.map(s=>{const a=avg(s.id),at=att(s.id),col=gc(s.firstName+s.lastName);return`<tr>
+    <td><div class="si"><div class="sav" style="background:linear-gradient(135deg,${col},${col}88)">${ini(s.firstName,s.lastName)}</div><div><div class="snm">${s.firstName} ${s.lastName}</div><div class="sid">${s.reg}</div></div></div></td>
+    <td style="font-size:11px;color:rgba(255,255,255,.45)">${s.class}</td>
+    <td style="font-weight:700;color:${a&&a>=60?'var(--success)':'var(--danger)'}">${a!=null?a+'%':'N/A'}</td>
+    <td><div style="display:flex;align-items:center;gap:6px"><div class="pb" style="width:65px"><div class="pf" style="width:${at}%;background:${at>=75?'var(--success)':at>=50?'var(--warning)':'var(--danger)'}"></div></div><span style="font-size:11px;font-weight:700">${at}%</span></div></td>
+    <td><span class="bdg ${sm[s.status]}">${s.status.toUpperCase()}</span></td>
+    <td><div style="display:flex;gap:5px"><button class="btn btn-p btn-sm" onclick="editS(${s.id})">✏️</button><button class="btn btn-d btn-sm" onclick="delS(${s.id})">🗑️</button></div></td>
+  </tr>`}).join('');
+}
+
+// ── GRADES ──
+function addGrade(){
+  const sid=parseInt(document.getElementById('g-stu').value),score=parseInt(document.getElementById('g-sc').value);
+  if(!sid||isNaN(score)||score<0||score>100){toast('Fill all fields','danger');return}
+  S.grades.push({id:Date.now(),sid,subject:document.getElementById('g-sbj').value,score,date:document.getElementById('g-dt').value||new Date().toISOString().split('T')[0],notes:document.getElementById('g-nt').value});
+  closeM('m-add-g');renderG();renderTop();refreshDash();toast('Grade added!','success');
+}
+function popGSel(){const sel=document.getElementById('g-stu');if(!sel)return;sel.innerHTML='<option value="">Select Student</option>'+S.students.map(s=>`<option value="${s.id}">${s.firstName} ${s.lastName}</option>`).join('')}
+function renderG(){
+  const tb=document.getElementById('g-tb');
+  if(!S.grades.length){tb.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:25px;color:rgba(0,212,255,.3)">NO GRADES YET</td></tr>`;return}
+  tb.innerHTML=[...S.grades].reverse().map(g=>{const s=S.students.find(x=>x.id===g.sid);if(!s)return'';const gr=lg(g.score),col=gc(s.firstName+s.lastName);return`<tr><td><div class="si"><div class="sav" style="background:linear-gradient(135deg,${col},${col}88);width:28px;height:28px;font-size:10px">${ini(s.firstName,s.lastName)}</div><span style="color:#fff;font-weight:600;font-size:13px">${s.firstName} ${s.lastName}</span></div></td><td style="font-size:12px;color:rgba(255,255,255,.5)">${g.subject}</td><td style="font-weight:900;font-size:16px">${g.score}<span style="font-size:10px;color:rgba(255,255,255,.25)">/100</span></td><td><span class="bdg ${gr.c}">${gr.l}</span></td><td style="font-size:11px;color:rgba(255,255,255,.25)">${g.date}</td></tr>`}).join('');
+}
+function renderTop(){
+  const c=document.getElementById('top-s');
+  const arr=S.students.map(s=>({s,a:avg(s.id)||0})).filter(x=>x.a>0).sort((a,b)=>b.a-a.a).slice(0,5);
+  if(!arr.length){c.innerHTML='<div style="text-align:center;color:rgba(0,212,255,.3);padding:20px">NO DATA YET</div>';return}
+  const rk=['rk1','rk2','rk3','rko','rko'];
+  c.innerHTML=arr.map((item,i)=>{const col=gc(item.s.firstName+item.s.lastName);return`<div class="ts"><div class="rk ${rk[i]}">${i+1}</div><div class="sav" style="background:linear-gradient(135deg,${col},${col}88);width:28px;height:28px;font-size:10px">${ini(item.s.firstName,item.s.lastName)}</div><div style="flex:1"><div style="font-size:12px;color:#fff;font-weight:600">${item.s.firstName} ${item.s.lastName}</div><div style="font-size:10px;color:rgba(0,212,255,.4)">${item.s.class}</div></div><div style="font-weight:900;color:var(--success);font-size:14px">${item.a}%</div></div>`}).join('');
+}
+
+// ── COURSES ──
+const DC=[{id:1,name:'Mathematics',teacher:'Dr. B.V. Rathish Kumar',icon:'📐',desc:'Calculus, Linear Algebra & DEs'},{id:2,name:'Physics',teacher:'Dr. P. Srinivasa Rao',icon:'⚡',desc:'Mechanics, Optics & Quantum'},{id:3,name:'Chemistry',teacher:'Dr. K. Malathi',icon:'🧪',desc:'Organic & Inorganic Chemistry'},{id:4,name:'Biology',teacher:'Dr. S. Ramesh',icon:'🧬',desc:'Cell Biology & Genetics'},{id:5,name:'Computer Science',teacher:'Dr. V. Sowmya',icon:'💻',desc:'Programming & System Design'},{id:6,name:'Data Structures',teacher:'Dr. M. Kiran Kumar',icon:'🗂️',desc:'Arrays, Trees, Graphs & Sorting'},{id:7,name:'Algorithms',teacher:'Dr. T. Srinivasulu',icon:'🔬',desc:'Complexity & Algorithm Design'},{id:8,name:'English',teacher:'Dr. A. Priya',icon:'📖',desc:'Technical Communication'}];
+function addCourse(){const nm=document.getElementById('c-nm').value.trim();if(!nm){toast('Name required','danger');return}S.courses.push({id:Date.now(),name:nm,teacher:document.getElementById('c-tc').value||'TBD',icon:document.getElementById('c-ic').value||'📚',desc:document.getElementById('c-ds').value});closeM('m-add-c');renderCourses();toast(`Course "${nm}" added!`,'success')}
+function renderCourses(){
+  const g=document.getElementById('cg');
+  const all=[...DC,...S.courses];
+  g.innerHTML=all.map((c,i)=>{const col=C[i%C.length],p=60+Math.floor(i*3.7)%35;return`<div class="cc"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px"><div class="cc-ico">${c.icon}</div><span class="bdg bi" style="font-size:9px">${S.students.length+Math.floor(i*1.7+8)} ENROLLED</span></div><div class="cc-nm">${c.name}</div><div class="cc-tc">👨‍🏫 ${c.teacher}</div><div class="cc-ds">${c.desc}</div><div class="pb" style="margin-bottom:6px"><div class="pf" style="width:${p}%;background:linear-gradient(to right,${col},${col}88)"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.3)"><span>PROGRESS</span><span style="color:${col};font-weight:700">${p}%</span></div></div>`}).join('');
+}
+
+// ── ATTENDANCE ──
+function renderAttList(){
+  const date=document.getElementById('att-dt').value,ex=S.attendance[date]||{},c=document.getElementById('att-list');
+  if(!S.students.length){c.innerHTML='<div style="text-align:center;color:rgba(0,212,255,.3);padding:20px">NO STUDENTS</div>';return}
+  c.innerHTML=S.students.map(s=>{const col=gc(s.firstName+s.lastName),cur=ex[s.id]||'present';return`<div class="att-r"><div class="sav" style="background:linear-gradient(135deg,${col},${col}88);width:28px;height:28px;font-size:10px;flex-shrink:0">${ini(s.firstName,s.lastName)}</div><div style="flex:1"><div style="font-size:12px;color:#fff;font-weight:600">${s.firstName} ${s.lastName}</div><div style="font-size:10px;color:rgba(0,212,255,.4)">${s.class}</div></div><select id="a-${s.id}" style="background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.16);border-radius:7px;padding:5px 8px;color:#fff;font-size:11px;outline:none;cursor:pointer"><option value="present" ${cur==='present'?'selected':''}>✅ Present</option><option value="absent" ${cur==='absent'?'selected':''}>❌ Absent</option><option value="late" ${cur==='late'?'selected':''}>⏰ Late</option></select></div>`}).join('');
+}
+function saveAtt(){const date=document.getElementById('att-dt').value;if(!date){toast('Select a date','warning');return}const rec={};S.students.forEach(s=>{const el=document.getElementById('a-'+s.id);if(el)rec[s.id]=el.value});S.attendance[date]=rec;renderAttOv();addAct('Attendance marked: '+date);toast('Attendance saved!','success')}
+function renderAttOv(){
+  const c=document.getElementById('att-ov');
+  if(!S.students.length){c.innerHTML='<div style="text-align:center;color:rgba(0,212,255,.3);padding:20px">NO DATA</div>';return}
+  c.innerHTML=S.students.map(s=>{const a=att(s.id),col=gc(s.firstName+s.lastName),bc=a>=75?'var(--success)':a>=50?'var(--warning)':'var(--danger)';return`<div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><div class="sav" style="background:linear-gradient(135deg,${col},${col}88);width:26px;height:26px;font-size:10px">${ini(s.firstName,s.lastName)}</div><div style="flex:1"><div style="font-size:11px;color:#fff;margin-bottom:3px;font-weight:600">${s.firstName} ${s.lastName}</div><div class="pb"><div class="pf" style="width:${a}%;background:${bc}"></div></div></div><span style="font-size:11px;font-weight:700;width:32px;text-align:right">${a}%</span></div>`}).join('');
+}
+document.getElementById('att-dt').addEventListener('change',renderAttList);
+
+// ── SCHEDULE ──
+const TM=['08:00 AM','09:00 AM','10:00 AM','11:00 AM','12:00 PM','01:00 PM','02:00 PM','03:00 PM'];
+const DY=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const DSC=[{time:'08:00 AM',day:'Monday',subject:'Mathematics',teacher:'Dr. Rathish Kumar',room:'LH-101'},{time:'09:00 AM',day:'Monday',subject:'Physics',teacher:'Dr. Srinivasa Rao',room:'Lab-A'},{time:'10:00 AM',day:'Tuesday',subject:'Chemistry',teacher:'Dr. K. Malathi',room:'Lab-B'},{time:'11:00 AM',day:'Wednesday',subject:'English',teacher:'Dr. A. Priya',room:'LH-205'},{time:'09:00 AM',day:'Thursday',subject:'Biology',teacher:'Dr. S. Ramesh',room:'Lab-C'},{time:'10:00 AM',day:'Friday',subject:'Computer Science',teacher:'Dr. V. Sowmya',room:'LH-110'},{time:'08:00 AM',day:'Wednesday',subject:'Algorithms',teacher:'Dr. Srinivasulu',room:'LH-302'},{time:'01:00 PM',day:'Tuesday',subject:'Data Structures',teacher:'Dr. M. Kiran',room:'LH-108'},{time:'02:00 PM',day:'Thursday',subject:'Mathematics',teacher:'Dr. Rathish Kumar',room:'LH-101'},{time:'03:00 PM',day:'Friday',subject:'Physics',teacher:'Dr. Srinivasa Rao',room:'Lab-A'}];
+function addSch(){S.schedule.push({id:Date.now(),time:document.getElementById('sc-t').value,day:document.getElementById('sc-d').value,subject:document.getElementById('sc-s').value||'Class',teacher:document.getElementById('sc-tc').value||'TBD',room:document.getElementById('sc-r').value||'TBD'});closeM('m-add-sch');renderSch();toast('Class added!','success')}
+function renderSch(){
+  const tb=document.getElementById('sch-tb');const all=[...DSC,...S.schedule];
+  tb.innerHTML=TM.map(t=>{const cells=DY.map(d=>{const e=all.find(x=>x.time===t&&x.day===d);if(e){const col=SC[e.subject]||'#00D4FF';return`<td style="padding:5px"><div class="sch-c" style="border-color:${col};background:${col}11"><div class="sch-s">${e.subject}</div><div class="sch-t">${e.teacher}</div><div class="sch-r">📍${e.room}</div></div></td>`}return`<td style="padding:5px"><div style="height:54px;border-radius:7px;background:rgba(255,255,255,.01);border:1px dashed rgba(255,255,255,.04)"></div></td>`}).join('');return`<tr><td style="padding:9px 12px;font-size:10px;color:rgba(0,212,255,.4);white-space:nowrap;font-weight:700">${t}</td>${cells}</tr>`}).join('');
+}
+
+// ── DASHBOARD ──
+function refreshDash(){
+  document.getElementById('d-tot').textContent=S.students.length;
+  document.getElementById('d-pre').textContent=Math.round(S.students.length*.85);
+  const a=calAvg();document.getElementById('d-avg').textContent=a?a+'%':'N/A';
+  const tb=document.getElementById('d-rtb'),recent=[...S.students].reverse().slice(0,5);
+  if(!recent.length){tb.innerHTML=`<tr><td colspan="3" style="text-align:center;padding:22px;color:rgba(0,212,255,.3)">NO STUDENTS — CLICK LOAD DEMO</td></tr>`}
+  else{const sm={active:'bs',inactive:'bw',graduated:'bg'};tb.innerHTML=recent.map(s=>{const a=avg(s.id),col=gc(s.firstName+s.lastName);return`<tr><td><div class="si"><div class="sav" style="background:linear-gradient(135deg,${col},${col}88);width:26px;height:26px;font-size:10px">${ini(s.firstName,s.lastName)}</div><div><div style="color:#fff;font-size:12px;font-weight:600">${s.firstName} ${s.lastName}</div><div style="font-size:10px;color:rgba(0,212,255,.4)">${s.reg}</div></div></div></td><td style="font-weight:700;color:${a&&a>=60?'var(--success)':'var(--danger)'}">${a!=null?a+'%':'N/A'}</td><td><span class="bdg ${sm[s.status]}">${s.status.toUpperCase()}</span></td></tr>`}).join('')}
+  renderChart();
+}
+function renderChart(){
+  const data=[8,14,12,22,19,28,25,33,38,30,36,42+S.students.length];
+  const months=['J','F','M','A','M','J','J','A','S','O','N','D'];
+  const max=Math.max(...data);
+  const ch=document.getElementById('e-chart'),lb=document.getElementById('e-labels');
+  ch.innerHTML=data.map((v,i)=>{const h=Math.round(v/max*100),col=C[i%C.length];return`<div class="ch-bw"><div class="ch-b" data-v="${v}" style="height:${h}%;background:linear-gradient(to top,${col}33,${col}88);border:1px solid ${col}44" onmouseover="this.style.filter='brightness(1.4)'" onmouseout="this.style.filter='none'"></div></div>`}).join('');
+  lb.innerHTML=months.map(m=>`<div style="flex:1;text-align:center;font-size:9px;color:rgba(255,255,255,.2)">${m}</div>`).join('');
+}
+
+// ── REPORTS ──
+function renderReports(){
+  const tot=S.students.length,a=calAvg(),pass=S.students.filter(s=>{const x=avg(s.id);return x!==null&&x>=60}).length;
+  let ta=0;S.students.forEach(s=>ta+=att(s.id));const aa=tot?Math.round(ta/tot):0;
+  document.getElementById('r-tot').textContent=tot;document.getElementById('r-avg').textContent=a?a+'%':'N/A';
+  document.getElementById('r-att').textContent=aa+'%';document.getElementById('r-pas').textContent=pass;
+  const tb=document.getElementById('r-tb');
+  if(!tot){tb.innerHTML=`<tr><td colspan="4" style="text-align:center;padding:25px;color:rgba(0,212,255,.3)">LOAD DEMO DATA FIRST</td></tr>`}
+  else{tb.innerHTML=S.students.map(s=>{const a=avg(s.id),at=att(s.id);let pf='N/A',pc='bi';if(a!==null){if(a>=85){pf='EXCELLENT';pc='bs'}else if(a>=70){pf='GOOD';pc='bi'}else if(a>=60){pf='AVERAGE';pc='bw'}else{pf='POOR';pc='bd'}}const col=gc(s.firstName+s.lastName);return`<tr><td><div class="si"><div class="sav" style="background:linear-gradient(135deg,${col},${col}88);width:26px;height:26px;font-size:10px">${ini(s.firstName,s.lastName)}</div><div><div style="color:#fff;font-weight:600">${s.firstName} ${s.lastName}</div><div style="font-size:10px;color:rgba(0,212,255,.4)">${s.class}</div></div></div></td><td style="font-weight:700;color:${a&&a>=60?'var(--success)':'var(--danger)'}">${a!=null?a+'%':'N/A'}</td><td><div style="display:flex;align-items:center;gap:6px"><div class="pb" style="width:55px"><div class="pf" style="width:${at}%;background:${at>=75?'var(--success)':at>=50?'var(--warning)':'var(--danger)'}"></div></div><span style="font-size:11px;font-weight:700">${at}%</span></div></td><td><span class="bdg ${pc}">${pf}</span></td></tr>`}).join('')}
+  const cd=document.getElementById('cls-dist');
+  const cls=['1st Year B.Tech','2nd Year B.Tech','3rd Year B.Tech','4th Year B.Tech','M.Tech 1st Year','Grade 11','Grade 12'];
+  const cnts=cls.map(c=>S.students.filter(s=>s.class===c).length);const mx=Math.max(...cnts,1);
+  const rows=cls.map((c,i)=>cnts[i]>0?`<div class="rbr"><span class="rbl">${c.replace(' B.Tech','BT').replace(' Year','Y').replace('M.Tech','MT')}</span><div class="pb" style="flex:1"><div class="pf" style="width:${Math.round(cnts[i]/mx*100)}%;background:linear-gradient(to right,${C[i%C.length]},${C[i%C.length]}88)"></div></div><span style="font-size:12px;color:#fff;font-weight:700;width:22px;text-align:right">${cnts[i]}</span></div>`:'').join('');
+  cd.innerHTML=rows||'<div style="text-align:center;color:rgba(0,212,255,.3);padding:20px">NO DATA</div>';
+}
+function exportCSV(){if(!S.students.length){toast('No data','warning');return}const rows=[['NAME','CLASS','REG','AVG GRADE','ATTENDANCE','STATUS'],...S.students.map(s=>[`${s.firstName} ${s.lastName}`,s.class,s.reg,avg(s.id)||'N/A',att(s.id)+'%',s.status])];const csv=rows.map(r=>r.join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='VITAP_Report.csv';a.click();toast('Exported!','success')}
+
+// ── SEARCH ──
+function gSearch(){const q=document.getElementById('g-src').value;if(!q)return;showSub('s-students');const el=document.getElementById('s-src');if(el){el.value=q;renderS()}}
+
+// ── DEMO DATA ──
+function seedDemo(){
+  if(S.students.length>0){toast('Demo already loaded!','warning');return}
+  const names=[['Arjun','Sharma'],['Priya','Patel'],['Rahul','Verma'],['Sneha','Reddy'],['Kiran','Kumar'],['Divya','Singh'],['Rohan','Mehta'],['Ananya','Nair'],['Vikas','Gupta'],['Lakshmi','Iyer'],['Aditya','Rao'],['Pooja','Joshi'],['Suresh','Pillai'],['Kavya','Menon'],['Nikhil','Tiwari']];
+  const cls=['1st Year B.Tech','2nd Year B.Tech','3rd Year B.Tech','4th Year B.Tech','M.Tech 1st Year'];
+  const sts=['active','active','active','active','active','inactive','graduated'];
+  const subjs=['Mathematics','Physics','Chemistry','Biology','English','Computer Science','Data Structures'];
+  names.forEach(([fn,ln],i)=>{
+    const id=S.nid++;
+    S.students.push({id,firstName:fn,lastName:ln,email:`${fn.toLowerCase()}@vitap.ac.in`,phone:`+91 9${String(800000000+id*17).slice(0,9)}`,class:cls[i%cls.length],status:sts[i%sts.length],reg:`22BCE${String(1000+i).slice(1)}`,parent:`Parent of ${fn}`});
+    subjs.forEach(s=>S.grades.push({id:Date.now()+Math.random()*1000,sid:id,subject:s,score:Math.floor(Math.random()*28)+70,date:'2024-10-15',notes:'Mid Sem'}));
+    ['2024-10-14','2024-10-15','2024-10-16','2024-10-17'].forEach(d=>{if(!S.attendance[d])S.attendance[d]={};const r=Math.random();S.attendance[d][id]=r>.88?'absent':r>.93?'late':'present'});
+  });
+  badge();refreshDash();addAct('Demo: 15 VITAP students loaded');toast('15 students loaded! 🎓','success');
+}
+function clearAll(){if(!confirm('Clear all data?'))return;S.students=[];S.grades=[];S.courses=[];S.schedule=[];S.attendance={};S.nid=1;badge();refreshDash();toast('Data cleared','warning')}
+
+// ── INIT ──
+document.getElementById('att-dt').value=new Date().toISOString().split('T')[0];
+document.getElementById('g-dt').value=new Date().toISOString().split('T')[0];
+renderChart();renderCourses();renderSch();
+</script>
+</body>
+</html>
